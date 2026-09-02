@@ -1,0 +1,17 @@
+node_modules
+.next
+out
+.git
+*.log
+.env
+.env.local
+.env*.local
+dev.db
+*.db-journal
+*.db-shm
+*.db-wal
+.DS_Store
+Dockerfile
+.dockerignore
+prisma/dev.db
+tsconfig.tsbuildinfo
