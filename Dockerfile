@@ -5,19 +5,15 @@
 # downloader needs to actually work.
 # ============================================================
 
-# ---- Installer stage: full JS deps + Python/yt-dlp deps ----
+# ---- Installer stage: full JS deps ----
 FROM node:20-slim AS installer
 WORKDIR /app
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Build tools + yt-dlp + ffmpeg + Playwright system deps
+# yt-dlp needs Python at runtime only; here just install build deps for native packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 python3-pip ffmpeg \
-    ca-certificates wget curl \
+    python3 python3-pip ffmpeg ca-certificates wget curl \
     && rm -rf /var/lib/apt/lists/*
-
-# yt-dlp (python3-pip path)
-RUN python3 -m pip install --no-cache-dir --upgrade yt-dlp
 
 COPY package.json package-lock.json ./
 RUN npm ci
@@ -42,10 +38,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
+# Runtime deps: python3 (yt-dlp dep), ffmpeg, openssl (prisma), ca certs
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 python3-pip ffmpeg openssl ca-certificates \
-    && rm -rf /var/lib/apt/lists/* \
-    && python3 -m pip install --no-cache-dir --upgrade yt-dlp
+    python3 ffmpeg openssl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# yt-dlp as a standalone binary (self-contained, no pip/venv, zero maintenance)
+RUN curl -L -o /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
+    && chmod +x /usr/local/bin/yt-dlp
 
 # Copy built app (node_modules includes playwright, so browser must be present)
 COPY --from=installer /app/node_modules ./node_modules
