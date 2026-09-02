@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model UsageLog {
+  id            String   @id @default(cuid())
+  fingerprint   String
+  timestamp     DateTime @default(now())
+
+  @@index([fingerprint, timestamp])
+}
+
+model License {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  licenseKey    String   @unique
+  variantPaid   String
+  createdAt     DateTime @default(now())
+}
