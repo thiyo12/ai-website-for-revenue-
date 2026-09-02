@@ -1,7 +1,7 @@
 export const ENV = {
   SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL ?? "",
   SITE_NAME: process.env.SITE_NAME ?? "QuicTools",
-  ADSENSE_ID: process.env.NEXT_PUBLIC_ADSENSE_ID ?? "",
+  ADSENSE_ID: process.env.NEXT_PUBLIC_ADSENSE_ID ?? "ca-pub-3655016924906610",
   ADSENSE_SLOT_HEADER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER ?? "",
   ADSENSE_SLOT_TOP: process.env.NEXT_PUBLIC_ADSENSE_SLOT_TOP ?? "",
   ADSENSE_SLOT_MIDDLE: process.env.NEXT_PUBLIC_ADSENSE_SLOT_MIDDLE ?? "",
@@ -13,6 +13,5 @@ export const ENV = {
   LEMONSQUEEZY_API_KEY: process.env.LEMONSQUEEZY_API_KEY ?? "",
   JWT_SECRET: process.env.JWT_SECRET ?? "",
   COOKIE_DOMAIN: process.env.COOKIE_DOMAIN ?? "",
-  EXCHANGE_RATE_API_KEY: process.env.EXCHANGE_RATE_API_KEY ?? "",
   DISABLE_USAGE_LIMIT: process.env.DISABLE_USAGE_LIMIT === "true",
 } as const;
