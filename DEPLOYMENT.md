@@ -70,7 +70,21 @@ npm run setup-browser
 sudo apt install -y build-essential
 ```
 
-## 4. Configure environment
+## 4. Database (PostgreSQL)
+
+The site uses **PostgreSQL** via Prisma. Set up a Postgres server, then point the app at it.
+
+**Option A — DigitalOcean Managed Database (recommended):**
+Create a "PostgreSQL" Managed Database in the DO dashboard, then grab its connection string.
+
+**Option B — Postgres on the same Droplet:**
+```bash
+sudo apt install -y postgresql
+sudo -u postgres psql -c "CREATE USER quictools WITH PASSWORD 'CHANGE_ME';"
+sudo -u postgres psql -c "CREATE DATABASE quictools OWNER quictools;"
+```
+
+## 4b. Configure environment
 
 ```bash
 cp .env.example .env
@@ -81,10 +95,17 @@ Set at minimum:
 ```env
 NEXT_PUBLIC_SITE_URL="https://yourdomain.com"
 SITE_NAME="QuicTools"
-DATABASE_URL="file:./dev.db"        # or a real path on the VPS
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/quictools?schema=public"
 DISABLE_USAGE_LIMIT="true"
 YTDLP_PATH="/usr/local/bin/yt-dlp"
 ```
+
+## 4c. Create the tables
+
+```bash
+npx prisma db push
+```
+This creates the `UsageLog` and `License` tables from the schema (idempotent, safe to re-run).
 
 If Instagram/TikTok still block the VPS IP, add a residential proxy:
 ```env
