@@ -60,15 +60,18 @@ rsync -av --exclude node_modules --exclude .next --exclude .env \
 ```bash
 cd quictools
 npm install
+# Generate the Prisma client for the PostgreSQL schema:
+npx prisma generate
 # Install the Playwright browser used for warm-session harvesting:
 npm run setup-browser
 ```
 
-`better-sqlite3` is a native module — `npm install` will build it (needs
-`python3` + `build-essential`). If the install fails, run:
-```bash
-sudo apt install -y build-essential
-```
+> `prisma generate` is required after `npm install` (the client is built for
+> the PostgreSQL schema). If anything native needs a compiler, `build-essential`
+> may be required:
+> ```bash
+> sudo apt install -y build-essential
+> ```
 
 ## 4. Database (PostgreSQL)
 
