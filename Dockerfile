@@ -50,6 +50,9 @@ RUN curl -L -o /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/l
 # Copy only the built standalone app + static assets (prunes the large full
 # node_modules copy, slashing build/export disk usage on the server)
 COPY --from=builder /app/.next/standalone ./
+# Next standalone does NOT bundle the public static chunks; copy them into the
+# standalone root so server.js can serve CSS/JS (otherwise the UI loads unstyled)
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
 # Install the Playwright headless browser (used for warm IG sessions)
