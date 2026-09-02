@@ -47,18 +47,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -L -o /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
     && chmod +x /usr/local/bin/yt-dlp
 
-# Copy built app (node_modules includes playwright, so browser must be present)
-COPY --from=installer /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
+# Copy only the built standalone app + static assets (prunes the large full
+# node_modules copy, slashing build/export disk usage on the server)
+COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/next.config.mjs ./next.config.mjs
-COPY --from=builder /app/prisma ./prisma
 
-# Install the Playwright headless browser (used for warm IG/TikTok sessions)
+# Install the Playwright headless browser (used for warm IG sessions)
 RUN npx playwright install chromium-headless-shell \
     && npx playwright install-deps chromium-headless-shell || true
 
 USER node
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
