@@ -4,6 +4,47 @@ These steps get the site (23 tools + 12 games) and the **public video downloader
 running on a VPS. The downloader can reach Instagram/TikTok public reels only when the
 VPS's IP is trusted by those platforms — see "Choosing a host" below.
 
+## Deploying with Dokploy (Docker) — recommended
+
+The repo includes a **`Dockerfile`** (full runtime: Node 20 + Python3 + yt-dlp +
+ffmpeg + Playwright Chromium) so Dokploy builds a complete, self-contained image —
+no separate `prisma generate`, `setup-browser`, or system packages needed on the host.
+
+### Create the app in Dokploy
+1. **Services → Dockerfile** (or "Docker" source type).
+2. Set the Build config's **Path** to the **repo root** (`.` or empty). This is the
+   fix for the `Nixpacks build failed / Failed to read app source directory` error.
+3. **Image build args** leave default (Node 20). Set these **runtime env vars**:
+   ```env
+   NEXT_PUBLIC_SITE_URL="https://yourdomain.com"
+   SITE_NAME="QuicTools"
+   DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/quictools?schema=public"
+   DISABLE_USAGE_LIMIT="true"
+   ```
+   (Add `HTTPS_PROXY`/`SOCKS_PROXY` for a residential proxy if IG/TikTok block the IP.)
+4. **Command**: `npm run start` (default). Port: `3000`.
+
+### Create the tables (one time)
+After the app deploys once, run (or use Dokploy's "Run command"):
+```bash
+cd /path/to/repo && npx prisma db push
+```
+or run the `npm run db:push` script against the Postgres `DATABASE_URL`.
+The image already ran `prisma generate` during build, so only `db push` is needed.
+
+### Auto-deploy (push → redeploy)
+1. In the Dokploy app, go to **Settings → Advanced / Generic** and copy the
+   **Deploy Webhook URL** (looks like `https://<dokploy>/api/...`).
+2. On GitHub: **Repo → Settings → Webhooks → Add webhook**:
+   - **Payload URL**: paste the Dokploy webhook URL
+   - **Content type**: `application/json`
+   - **Which events**: *Just the push event* (and/or branch `main`)
+3. Now every `git push origin main` triggers a Dokploy **redeploy on Docker** —
+   Dokploy pulls the new commit and rebuilds automatically. No SSH needed.
+
+Alternatively, keep "Options → Auto Deploy" enabled in the Dokploy app if using
+GitHub App integration (it auto-deploys on every push to the tracked branch).
+
 ## Prerequisites (choose a host)
 
 Pick a VPS whose public IP is NOT obviously a blocked datacenter range.
