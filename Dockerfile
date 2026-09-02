@@ -38,9 +38,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
-# Runtime deps: python3 (yt-dlp dep), ffmpeg, openssl (prisma), ca certs
+# Runtime deps: python3, ffmpeg, curl (yt-dlp download), openssl (prisma), ca certs
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 ffmpeg openssl ca-certificates \
+    python3 ffmpeg curl openssl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # yt-dlp as a standalone binary (self-contained, no pip/venv, zero maintenance)
