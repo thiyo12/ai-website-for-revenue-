@@ -13,5 +13,5 @@ export const ENV = {
   LEMONSQUEEZY_API_KEY: process.env.LEMONSQUEEZY_API_KEY ?? "",
   JWT_SECRET: process.env.JWT_SECRET ?? "",
   COOKIE_DOMAIN: process.env.COOKIE_DOMAIN ?? "",
-  DISABLE_USAGE_LIMIT: process.env.DISABLE_USAGE_LIMIT === "true",
+  DISABLE_USAGE_LIMIT: process.env.DISABLE_USAGE_LIMIT !== "false",
 } as const;
