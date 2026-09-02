@@ -1,9 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkUsageLimit, recordUsage } from "@/lib/usage";
 import { verifyUnlockToken } from "@/lib/jwt";
-import { getClientIp } from "@/lib/ip";
+import { RateLimiter, getClientIp } from "../lib/rate";
+
+const usageLimiter = new RateLimiter(30, 60_000);
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  if (usageLimiter.isLimited(ip)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a minute and try again." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json().catch(() => ({}));
     const fingerprint = body.fingerprint as string | undefined;
@@ -11,7 +21,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "fingerprint required" }, { status: 400 });
     }
 
-    const ip = getClientIp(request);
     const auth = request.headers.get("authorization");
     const token = auth?.startsWith("Bearer ") ? auth.slice(7) : undefined;
 

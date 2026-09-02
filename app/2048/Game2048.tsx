@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Sound } from "@/lib/sound";
 
 type Board = number[][];
@@ -220,8 +220,25 @@ export default function Game2048() {
     return () => window.removeEventListener("keydown", handler);
   }, [handleMove]);
 
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY };
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStart.current.x;
+    const dy = t.clientY - touchStart.current.y;
+    touchStart.current = null;
+    const threshold = 24;
+    if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
+    if (Math.abs(dx) > Math.abs(dy)) handleMove(dx > 0 ? "right" : "left");
+    else handleMove(dy > 0 ? "down" : "up");
+  };
+
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="game-bg-animated flex flex-col items-center gap-6 rounded-xl">
       <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900">2048</h1>
@@ -241,17 +258,18 @@ export default function Game2048() {
           </div>
         </div>
 
-        <div className="relative rounded-xl bg-gray-300 p-2">
-          <div className="grid grid-cols-4 gap-2">
+        <div className="relative rounded-xl bg-gray-300 p-2 touch-none select-none" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+          <div className="grid grid-cols-4 gap-1 sm:gap-2">
             {board.flat().map((val, i) => {
               const colors = tileColors[val] || tileColors[0];
               return (
                 <div
                   key={i}
-                  className="flex h-20 w-full items-center justify-center rounded-lg text-2xl font-bold transition-colors"
+                  className="flex aspect-square w-full items-center justify-center rounded-lg font-bold transition-colors"
                   style={{
                     backgroundColor: colors.bg,
                     color: colors.text,
+                    fontSize: val >= 1000 ? "min(4.5vw, 1.5rem)" : val >= 100 ? "min(5.5vw, 1.75rem)" : "min(7vw, 2.25rem)",
                   }}
                 >
                   {val !== 0 ? val : ""}

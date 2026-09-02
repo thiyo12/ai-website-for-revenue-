@@ -568,6 +568,33 @@ export default function Tetris() {
     movePiece(1, 0);
   }, [movePiece]);
 
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const swipeableRef = useCallback((node: HTMLDivElement | null) => {
+    if (!node) return;
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      touchStart.current = { x: t.clientX, y: t.clientY };
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!touchStart.current) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStart.current.x;
+      const dy = t.clientY - touchStart.current.y;
+      touchStart.current = null;
+      const threshold = 24;
+      if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
+      if (Math.abs(dx) > Math.abs(dy)) movePiece(0, dx > 0 ? 1 : -1);
+      else if (dy > 0) softDrop();
+      else rotatePiece();
+    };
+    node.addEventListener("touchstart", onTouchStart, { passive: true });
+    node.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      node.removeEventListener("touchstart", onTouchStart);
+      node.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [movePiece, softDrop, rotatePiece]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (gameStateRef.current !== "playing") return;
@@ -659,11 +686,12 @@ export default function Tetris() {
   const previewType = nextPreview || (currentPiece && bagRef.current.length > 0 ? bagRef.current[0] : null);
 
   return (
-    <div className="flex flex-col items-center gap-6 select-none">
-      <div className="flex gap-8 items-start">
-        <div className="flex flex-col gap-3">
+    <div className="game-bg-animated flex flex-col items-center gap-6 select-none rounded-xl">
+      <div className="flex flex-col md:flex-row gap-8 md:items-start items-center">
+        <div className="flex flex-col gap-3 items-center">
           <div
-            className="rounded-lg overflow-hidden border-2 border-accent-600/30"
+            ref={swipeableRef}
+            className="rounded-lg overflow-hidden border-2 border-accent-600/30 touch-none"
             style={{
               display: "grid",
               gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`,
@@ -719,7 +747,7 @@ export default function Tetris() {
           )}
         </div>
 
-        <div className="flex flex-col gap-4 pt-1">
+        <div className="flex flex-col gap-4 pt-1 md:items-stretch items-center">
           <div className="flex flex-col items-center gap-1">
             <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
               Score
@@ -808,8 +836,40 @@ export default function Tetris() {
         </div>
       </div>
 
+      <div className="w-full max-w-xs grid grid-cols-3 gap-2 mt-2 md:hidden select-none">
+        <button
+          type="button"
+          onPointerDown={(e) => { e.preventDefault(); movePiece(0, -1); }}
+          className="rounded-lg bg-slate-800 py-3 text-lg font-bold text-white active:bg-slate-600"
+        >
+          ◀
+        </button>
+        <button
+          type="button"
+          onPointerDown={(e) => { e.preventDefault(); rotatePiece(); }}
+          className="rounded-lg bg-slate-800 py-3 text-lg font-bold text-white active:bg-slate-600"
+        >
+          ↻
+        </button>
+        <button
+          type="button"
+          onPointerDown={(e) => { e.preventDefault(); movePiece(0, 1); }}
+          className="rounded-lg bg-slate-800 py-3 text-lg font-bold text-white active:bg-slate-600"
+        >
+          ▶
+        </button>
+        <button
+          type="button"
+          onPointerDown={(e) => { e.preventDefault(); softDrop(); }}
+          className="col-span-3 rounded-lg bg-slate-700 py-3 text-base font-bold text-white active:bg-slate-500"
+        >
+          Soft Drop (▼)
+        </button>
+      </div>
+
       <div className="flex flex-col items-center gap-1 text-xs text-gray-400">
-        <p>Arrow keys to move &middot; Up to rotate &middot; Space to drop</p>
+        <p className="md:hidden">Swipe the board or use the buttons below</p>
+        <p className="hidden md:block">Arrow keys to move &middot; Up to rotate &middot; Space to drop</p>
       </div>
     </div>
   );

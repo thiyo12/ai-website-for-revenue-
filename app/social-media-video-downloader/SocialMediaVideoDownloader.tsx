@@ -51,6 +51,12 @@ function formatDuration(sec?: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+// Route downloads through the server so the browser receives the file as an
+// attachment (real download) instead of opening the remote media in a new tab.
+function proxyHref(downloadUrl: string): string {
+  return `/api/download?url=${encodeURIComponent(downloadUrl)}`;
+}
+
 export default function SocialMediaVideoDownloader() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -207,9 +213,8 @@ export default function SocialMediaVideoDownloader() {
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               {data.downloadUrl && (
                 <a
-                  href={data.downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={proxyHref(data.downloadUrl)}
+                  download
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-700"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -220,9 +225,8 @@ export default function SocialMediaVideoDownloader() {
               )}
               {data.audioUrl && (
                 <a
-                  href={data.audioUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={proxyHref(data.audioUrl)}
+                  download
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -236,7 +240,7 @@ export default function SocialMediaVideoDownloader() {
             {data.downloadUrl && (
               <button
                 type="button"
-                onClick={() => copyLink(data.downloadUrl as string)}
+                onClick={() => copyLink(proxyHref(data.downloadUrl as string))}
                 className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-600 transition-colors hover:text-accent-700"
               >
                 {copied ? (

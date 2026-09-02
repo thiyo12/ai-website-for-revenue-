@@ -20,9 +20,16 @@ function validSignature(rawBody: string, signature: string | null): boolean {
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
   const signature = request.headers.get("x-signature");
-  const test = request.headers.get("x-test");
 
-  if (!test && process.env.NODE_ENV === "production") {
+  // Never trust the "x-test" header in production — it must not bypass webhook
+  // signature verification. In production we always require a valid HMAC
+  // signature. The test bypass is only honored outside production AND only when
+  // explicitly enabled via ALLOW_TEST_WEBHOOKS.
+  if (process.env.NODE_ENV === "production") {
+    if (!signature || !validSignature(rawBody, signature)) {
+      return new NextResponse("Invalid signature", { status: 401 });
+    }
+  } else if (process.env.ALLOW_TEST_WEBHOOKS !== "true") {
     if (!signature || !validSignature(rawBody, signature)) {
       return new NextResponse("Invalid signature", { status: 401 });
     }

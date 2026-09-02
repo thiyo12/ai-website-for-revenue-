@@ -18,12 +18,62 @@ async function assertPublicHost(hostname: string): Promise<void> {
   }
 }
 
+const ALLOWED_EXT = new Set([
+  "mp4", "webm", "mov", "m4v", "mkv",
+  "mp3", "m4a", "aac", "wav", "ogg", "flac",
+  "jpg", "jpeg", "png", "gif", "webp",
+  "pdf",
+]);
+
 function fileNameFromUrl(u: URL): string {
   const base = u.pathname.split("/").pop()?.split("?")[0] ?? "video";
   const sanitized = base.replace(/[^\w.\-]+/g, "_").slice(-80) || "video";
-  return sanitized.endsWith(".mp4") || sanitized.endsWith(".webm") || sanitized.endsWith(".mov") || sanitized.endsWith(".m4a") || sanitized.endsWith(".mp3")
-    ? sanitized
-    : `${sanitized}.mp4`;
+  const ext = sanitized.includes(".") ? sanitized.split(".").pop()!.toLowerCase() : "";
+  const final = ALLOWED_EXT.has(ext) ? sanitized : `${sanitized}.mp4`;
+  return final;
+}
+
+const MAX_REDIRECTS = 5;
+
+async function safeFetch(
+  target: URL,
+  headers: Record<string, string>,
+  signal: AbortSignal
+): Promise<globalThis.Response> {
+  let current = target;
+  let redirects = 0;
+  let headersForHop = headers;
+  for (;;) {
+    await assertPublicHost(current.hostname);
+    const res = await fetch(current, {
+      headers: headersForHop,
+      redirect: "manual",
+      signal,
+    });
+    if (
+      (res.status === 301 || res.status === 302 || res.status === 303 || res.status === 307 || res.status === 308) &&
+      res.headers.get("location")
+    ) {
+      if (++redirects > MAX_REDIRECTS) {
+        throw new Error("too many redirects");
+      }
+      try {
+        current = new URL(res.headers.get("location")!, current);
+      } catch {
+        throw new Error("bad redirect");
+      }
+      if (current.protocol !== "https:" && current.protocol !== "http:") {
+        throw new Error("non-http redirect");
+      }
+      // Drop Range on redirect to avoid 416 errors; keep UA/Accept.
+      headersForHop = {
+        "User-Agent": headers["User-Agent"],
+        Accept: headers.Accept,
+      };
+      continue;
+    }
+    return res;
+  }
 }
 
 export async function GET(req: NextRequest): Promise<Response> {
@@ -70,11 +120,7 @@ export async function GET(req: NextRequest): Promise<Response> {
 
   let upstream: globalThis.Response;
   try {
-    upstream = await fetch(target, {
-      headers: upstreamHeaders,
-      redirect: "follow",
-      signal: AbortSignal.timeout(120_000),
-    });
+    upstream = await safeFetch(target, upstreamHeaders, AbortSignal.timeout(120_000));
   } catch {
     return new Response("The source did not respond. Try again in a moment.", { status: 502 });
   }

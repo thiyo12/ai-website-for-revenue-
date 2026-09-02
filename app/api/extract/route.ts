@@ -234,10 +234,12 @@ function runExtract(
       if (code !== 0) {
         const line = stderr.split("\n").filter(Boolean).pop()?.trim() ?? "";
         const message = line.replace(/^ERROR:\s*\[?[^\]]*\]?\s*/, "").slice(0, 300);
+        // Classify with the engine output but never echo the raw engine text to
+        // the client (it may leak internal URLs/IPs). Return fixed friendly text.
         resolve(
           /private|login|sign in|unavailable|content isn't available/i.test(message)
             ? { status: 400, error: "This video is private, removed, or requires a login, so it can't be extracted." }
-            : { status: 422, error: message || "This video could not be extracted. It may be unavailable or restricted." }
+            : { status: 422, error: "The video could not be extracted. It may be restricted or temporarily unavailable." }
         );
         return;
       }
@@ -291,10 +293,10 @@ const PLATFORM_FALLBACKS: Record<string, string> = {
   soundcloud: "This audio could not be extracted. It may be unavailable or restricted.",
 };
 
-function mapExtractError(platform: string, rawError: string): string {
+function mapExtractError(platform: string): string {
   const limited = LIMITED_PLATFORMS[platform];
   if (limited) return `${limited.label} is currently unavailable. ${limited.reason}`;
-  return (PLATFORM_FALLBACKS[platform] ?? rawError.trim()) || "This video could not be extracted. It may be unavailable or restricted.";
+  return PLATFORM_FALLBACKS[platform] ?? "This video could not be extracted. It may be unavailable or restricted.";
 }
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -357,7 +359,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const result = await runExtract(parsed.href, binary, cert, opts);
   if (result.error || result.status || !result.data) {
     const limited = LIMITED_PLATFORMS[hostEntry.platform];
-    const friendly = mapExtractError(hostEntry.platform, result.error ?? "");
+    const friendly = mapExtractError(hostEntry.platform);
     return NextResponse.json(
       {
         error: friendly,

@@ -2,10 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+const CURRENCIES = [
+  "USD", "EUR", "GBP", "JPY", "INR", "LKR",
+  "AUD", "CAD", "CNY", "CHF", "NZD", "SGD", "AED", "BRL", "IDR", "MYR",
+].join(",");
+
 export async function GET(request: NextRequest) {
-  const base = (request.nextUrl.searchParams.get("base") ?? "USD").toUpperCase();
-  const CURRENCIES = "USD,EUR,GBP,JPY,INR,LKR,AUD,CAD,CNY,CHF,NZD,SGD";
-  const key = process.env.EXCHANGE_RATE_API_KEY ?? "";
+  const rawBase = (request.nextUrl.searchParams.get("base") ?? "USD").toUpperCase();
+
+  // Whitelist the base currency to prevent injecting arbitrary path segments /
+  // special characters into the upstream URL (SSRF path probing).
+  const allowed = CURRENCIES.split(",");
+  if (!allowed.includes(rawBase)) {
+    return NextResponse.json({ error: "Unsupported base currency" }, { status: 400 });
+  }
+  const base = rawBase;
 
   const url = `https://open.er-api.com/v6/latest/${base}`;
 

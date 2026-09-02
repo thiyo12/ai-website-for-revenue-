@@ -123,6 +123,20 @@ export default function RootLayout({
           crossOrigin="anonymous"
         /> */}
 
+        {/* GOOGLE ANALYTICS 4 (gtag.js) */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-F3SQKWPTQB"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-F3SQKWPTQB');`,
+          }}
+        />
+
         {/* GOOGLE ADSENSE - loaded from env when NEXT_PUBLIC_ADSENSE_ID is set */}
         {ENV.ADSENSE_ID ? (
           <script

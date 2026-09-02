@@ -44,7 +44,7 @@ async function readDocxText(file: File): Promise<string> {
     const stream = new Blob([target.compressed.slice()]).stream().pipeThrough(ds);
     raw = new Uint8Array(await new Response(stream).arrayBuffer());
   } else {
-    throw new Error("unsupported-compression");
+    throw new Error("no-inflate");
   }
 
   const xml = new TextDecoder().decode(raw);
@@ -150,7 +150,11 @@ export default function WordToPdf() {
       setSuccess("Converted to PDF — download started automatically.");
     } catch (err) {
       console.error(err);
-      setError("Could not convert this file. Please make sure it is a valid Word (.docx) document.");
+      setError(
+        err instanceof Error && err.message === "no-inflate"
+          ? "This .docx file is compressed, and your browser doesn't support the decompression API needed to read it. Try updating your browser or using a recent version of Chrome, Firefox, Edge, or Safari."
+          : "Could not convert this file. Please make sure it is a valid Word (.docx) document."
+      );
     } finally {
       setConverting(false);
     }

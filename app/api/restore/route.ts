@@ -2,9 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { createUnlockToken, unlockCookieAttrs } from "@/lib/jwt";
 import { lsGet } from "@/lib/lemon";
 import { sha256 } from "@/lib/hash";
+import { RateLimiter, getClientIp } from "../lib/rate";
 import prisma from "@/lib/prisma";
 
+const restoreLimiter = new RateLimiter(5, 60_000);
+
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  if (restoreLimiter.isLimited(ip)) {
+    return NextResponse.json(
+      { error: "Too many attempts. Please wait a minute and try again." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json().catch(() => ({}));
     const email = (body.email as string ?? "").trim().toLowerCase();
@@ -15,18 +26,18 @@ export async function POST(request: NextRequest) {
     }
 
     const res = await lsGet(`/v1/licenses/${encodeURIComponent(licenseKey)}`);
-    if (!res.ok) {
-      return NextResponse.json({ error: "Invalid license key" }, { status: 400 });
-    }
-    const data = (await res.json()) as any;
+    const okResponse = res.ok;
+    const data = okResponse ? ((await res.json()) as any) : null;
     const licenseData = data?.data?.attributes;
-    if (!licenseData) {
-      return NextResponse.json({ error: "Invalid license key" }, { status: 400 });
-    }
-
     const licenseEmail = (licenseData.email ?? "").trim().toLowerCase();
-    if (licenseEmail !== email) {
-      return NextResponse.json({ error: "License does not match this email" }, { status: 400 });
+
+    // Generic error: do not reveal whether the key is invalid or the email does
+    // not match (prevents license brute-force / email enumeration).
+    if (!okResponse || !licenseData || licenseEmail !== email) {
+      return NextResponse.json(
+        { error: "License could not be restored. Please double-check your license key and email." },
+        { status: 400 }
+      );
     }
 
     const variant = licenseData.variant_name ?? "Global";

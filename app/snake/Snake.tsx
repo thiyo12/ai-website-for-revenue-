@@ -5,7 +5,12 @@ import { Sound } from "@/lib/sound";
 
 const COLS = 20;
 const ROWS = 20;
-const INITIAL_SPEED = 150;
+
+type Difficulty = "normal" | "hard";
+const SPEED_CONFIG: Record<Difficulty, { start: number; perScore: number; min: number }> = {
+  normal: { start: 150, perScore: 2, min: 60 },
+  hard: { start: 110, perScore: 3, min: 40 },
+};
 
 type Point = { x: number; y: number };
 type Direction = "UP" | "DOWN" | "LEFT" | "RIGHT";
@@ -35,16 +40,19 @@ export default function Snake() {
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [gameState, setGameState] = useState<"idle" | "playing" | "over">("idle");
+  const [difficulty, setDifficulty] = useState<Difficulty>("normal");
 
   const dirRef = useRef<Direction>("RIGHT");
   const snakeRef = useRef<Point[]>(snake);
   const foodRef = useRef<Point>(food);
   const scoreRef = useRef(score);
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const difficultyRef = useRef<Difficulty>(difficulty);
 
   snakeRef.current = snake;
   foodRef.current = food;
   scoreRef.current = score;
+  difficultyRef.current = difficulty;
 
   useEffect(() => {
     try {
@@ -136,12 +144,14 @@ export default function Snake() {
         setFood(newFood);
 
         stopTick();
-        const newSpeed = Math.max(60, INITIAL_SPEED - newScore * 2);
+        const cfg = SPEED_CONFIG[difficultyRef.current];
+        const newSpeed = Math.max(cfg.min, cfg.start - newScore * cfg.perScore);
         tickRef.current = setInterval(tick, newSpeed);
       }
     };
 
-    const spd = Math.max(60, INITIAL_SPEED - scoreRef.current * 2);
+    const cfg = SPEED_CONFIG[difficultyRef.current];
+    const spd = Math.max(cfg.min, cfg.start - scoreRef.current * cfg.perScore);
     stopTick();
     tickRef.current = setInterval(tick, spd);
 
@@ -167,6 +177,23 @@ export default function Snake() {
     if (dirRef.current !== OPPOSITE[d]) dirRef.current = d;
   };
 
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY };
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStart.current.x;
+    const dy = t.clientY - touchStart.current.y;
+    touchStart.current = null;
+    const threshold = 24;
+    if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
+    if (Math.abs(dx) > Math.abs(dy)) setDir(dx > 0 ? "RIGHT" : "LEFT");
+    else setDir(dy > 0 ? "DOWN" : "UP");
+  };
+
   const share = async () => {
     try {
       await navigator.clipboard.writeText(`🐍 I scored ${score} in Snake!`);
@@ -177,7 +204,7 @@ export default function Snake() {
   const foodKey = `${food.x},${food.y}`;
 
   return (
-    <div className="flex flex-col items-center gap-6 py-10">
+    <div className="game-bg-animated flex flex-col items-center gap-6 py-10 rounded-xl">
       <h1 className="text-3xl font-bold text-slate-800">Snake</h1>
 
       <div className="flex gap-8 text-lg font-semibold">
@@ -186,7 +213,9 @@ export default function Snake() {
       </div>
 
       <div
-        className="grid border-2 border-slate-300 rounded-lg overflow-hidden"
+        className="grid border-2 border-slate-300 rounded-lg overflow-hidden touch-none select-none"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         style={{
           gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${ROWS}, minmax(0, 1fr))`,
@@ -218,9 +247,36 @@ export default function Snake() {
       </div>
 
       {gameState === "idle" && (
-        <button onClick={handleStart} className="rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-700">
-          Start Game
-        </button>
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-slate-600">Difficulty:</span>
+            <button
+              type="button"
+              onClick={() => setDifficulty("normal")}
+              className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+                difficulty === "normal"
+                  ? "bg-accent-600 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              Normal
+            </button>
+            <button
+              type="button"
+              onClick={() => setDifficulty("hard")}
+              className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+                difficulty === "hard"
+                  ? "bg-accent-600 text-white"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              Hard
+            </button>
+          </div>
+          <button onClick={handleStart} className="rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-700">
+            Start Game
+          </button>
+        </div>
       )}
 
       {gameState === "over" && (

@@ -435,7 +435,7 @@ export default function HomePage() {
 
       <section
         aria-labelledby="tools-heading"
-        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
       >
         <h2
           id="tools-heading"
@@ -456,7 +456,7 @@ export default function HomePage() {
 
       <section
         aria-labelledby="games-heading"
-        className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
       >
         <h2
           id="games-heading"
