@@ -38,9 +38,6 @@ interface ExtractResult {
 }
 
 const ALLOWED_HOSTS: { match: RegExp; platform: string }[] = [
-  // TikTok / Douyin
-  { match: /^(www\.|vm\.|vt\.|m\.)?tiktok\.com$/i, platform: "tiktok" },
-  { match: /^(www\.|v\.|m\.)?douyin\.com$/i, platform: "tiktok" },
   // YouTube
   { match: /^(www\.|m\.|music\.)?youtube\.com$/i, platform: "youtube" },
   { match: /^youtu\.be$/i, platform: "youtube" },
@@ -78,11 +75,6 @@ interface LimitedPlatform {
 }
 
 const LIMITED_PLATFORMS: Record<string, LimitedPlatform> = {
-  tiktok: {
-    label: "TikTok",
-    reason:
-      "TikTok is refusing to serve this video to the download server right now. This usually works from a regular home connection — try again later or open the link in your own browser.",
-  },
   instagram: {
     label: "Instagram",
     reason:
@@ -282,121 +274,8 @@ function runExtract(
   });
 }
 
-interface TikTokSigned {
-  data?: {
-    signed_url?: string;
-    cookies?: string;
-    navigator?: { user_agent?: string };
-  };
-}
-
-async function extractTikTokViaSignature(
-  videoUrl: string
-): Promise<{ downloadUrl: string; thumbnail?: string; title?: string } | null> {
-  const base = process.env.TIKTOK_SIGNATURE_URL?.replace(/\/+$/, "");
-  if (!base) return null;
-  const idMatch = videoUrl.match(/video\/(\d+)/);
-  const videoId = idMatch?.[1] ?? "";
-  if (!videoId) return null;
-
-  const params = new URLSearchParams({
-    aid: "1988",
-    app_language: "en",
-    app_name: "tiktok_web",
-    browser_language: "en-US",
-    browser_name: "Mozilla",
-    browser_online: "true",
-    browser_platform: "MacIntel",
-    browser_version: "5.0 (Windows)",
-    channel: "tiktok_web",
-    cookie_enabled: "true",
-    device_platform: "web_pc",
-    focus_state: "true",
-    history_len: "2",
-    is_fullscreen: "false",
-    is_page_visible: "true",
-    language: "en",
-    os: "windows",
-    priority_region: "US",
-    region: "US",
-    screen_height: "1080",
-    screen_width: "1920",
-    item_id: videoId,
-    tz_name: "America/New_York",
-    webcast_language: "en",
-  });
-  const apiUrl = "https://www.tiktok.com/api/item/detail/?" + params.toString();
-
-  let signed: TikTokSigned;
-  try {
-    const res = await fetch(`${base}/signature`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: apiUrl }),
-      signal: AbortSignal.timeout(15_000),
-    });
-    if (!res.ok) return null;
-    signed = (await res.json()) as TikTokSigned;
-  } catch {
-    return null;
-  }
-
-  const signedUrl = signed?.data?.signed_url;
-  if (!signedUrl) return null;
-
-  try {
-    const res = await fetch(signedUrl, {
-      headers: {
-        "User-Agent": signed.data?.navigator?.user_agent ?? "",
-        Cookie: signed.data?.cookies ?? "",
-        Accept: "application/json",
-        Referer: "https://www.tiktok.com/",
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-      signal: AbortSignal.timeout(20_000),
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as {
-      statusCode?: number;
-      itemInfo?: {
-        itemStruct?: {
-          desc?: string;
-          video?: {
-            playAddr?: { urlList?: string[] };
-            play_addr?: { url_list?: string[] };
-            downloadAddr?: { urlList?: string[] };
-            download_addr?: { url_list?: string[] };
-            cover?: { urlList?: string[]; url_list?: string[] };
-          };
-        };
-      };
-    };
-    if (data.statusCode !== 0 && data.statusCode !== undefined && data.statusCode !== null) {
-      return null;
-    }
-    const video = data.itemInfo?.itemStruct?.video;
-    const urls: string[] = [
-      ...(video?.downloadAddr?.urlList ?? []),
-      ...(video?.download_addr?.url_list ?? []),
-      ...(video?.playAddr?.urlList ?? []),
-      ...(video?.play_addr?.url_list ?? []),
-    ];
-    const downloadUrl = urls.find((u) => u && /^https?:/.test(u));
-    if (!downloadUrl) return null;
-    return {
-      downloadUrl,
-      title: data.itemInfo?.itemStruct?.desc,
-      thumbnail: video?.cover?.urlList?.[0] ?? video?.cover?.url_list?.[0],
-    };
-  } catch {
-    return null;
-  }
-}
-
 const PLATFORM_FALLBACKS: Record<string, string> = {
   youtube: "This YouTube video could not be extracted. It may be private, removed, or restricted.",
-  tiktok:
-    "This TikTok link couldn't be extracted. TikTok is refusing to serve it to the download server right now — try opening it in your own browser to confirm it's public.",
   instagram:
     "This Instagram post couldn't be extracted. Instagram is refusing to serve the video to the download server right now — make sure it's a public post and try again later.",
   facebook: "This Facebook video could not be extracted. It may be private, removed, or restricted.",
@@ -454,31 +333,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  if (hostEntry.platform === "tiktok") {
-    const signed = await extractTikTokViaSignature(parsed.href);
-    if (signed) {
-      return NextResponse.json({
-        platform: "tiktok",
-        title: signed.title,
-        thumbnail: signed.thumbnail,
-        downloadUrl: signed.downloadUrl,
-        audioUrl: null,
-        videoOnly: false,
-        format: "mp4",
-      });
-    }
-    if (process.env.TIKTOK_SIGNATURE_URL) {
-      return NextResponse.json(
-        {
-          error: `TikTok could not be extracted right now.`,
-          platformLimited: true,
-          platform: "tiktok",
-        },
-        { status: 422 }
-      );
-    }
-  }
-
   const binary = resolveBinary();
   if (!binary) {
     return NextResponse.json(
@@ -489,11 +343,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const cert = resolveCertifi();
 
   let opts: { cookies: string | null; proxy: string | null } = { cookies: null, proxy: null };
-  if (hostEntry.platform === "instagram" || hostEntry.platform === "tiktok") {
+  if (hostEntry.platform === "instagram") {
     try {
       const session = await getMediaSession();
-      opts.cookies =
-        hostEntry.platform === "instagram" ? session.instagramCookieJar : session.tiktokCookieJar;
+      opts.cookies = session.instagramCookieJar;
       opts.proxy = session.proxy;
     } catch {
       // If the session harvester fails (e.g. browser not available), fall back to no cookies.

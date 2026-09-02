@@ -17,7 +17,7 @@ This is perfect for preserving tutorials and recipes to watch later, collecting 
 
 All processing happens on our server using an open media extractor, so you never have to install anything or grant permissions. Just paste, download, and you're done.
 
-Note: this downloader only works on public posts from public accounts — we never access private accounts or content that requires a login. Social platforms like TikTok and Instagram deploy strict anti-bot measures, so when one of them is temporarily blocking automated downloads, the tool tells you clearly instead of returning a confusing error. YouTube downloads are available right now.`;
+Note: this downloader only works on public posts from public accounts — we never access private accounts or content that requires a login. Social platforms like Instagram deploy strict anti-bot measures, so when it is temporarily blocking automated downloads, the tool tells you clearly instead of returning a confusing error. YouTube downloads are available right now.`;
 
 export default function SocialMediaVideoDownloaderPage() {
   const description =

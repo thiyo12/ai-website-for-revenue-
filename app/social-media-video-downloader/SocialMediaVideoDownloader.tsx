@@ -29,7 +29,6 @@ interface ExtractResponse {
 }
 
 const ERROR_MESSAGES: Record<string, string> = {
-  tiktok: "TikTok",
   youtube: "YouTube",
   facebook: "Facebook",
   instagram: "Instagram",
@@ -124,7 +123,7 @@ export default function SocialMediaVideoDownloader() {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Paste any public video link (YouTube, TikTok, Instagram, X, Facebook…)"
+            placeholder="Paste any public video link (YouTube, Instagram, X, Facebook…)"
             className="w-full flex-1 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-accent-500 focus:ring-2 focus:ring-accent-200"
           />
           <button
@@ -138,7 +137,7 @@ export default function SocialMediaVideoDownloader() {
         </div>
         <p className="mt-3 text-xs text-gray-500">
           Paste a public video link to download it. Works for YouTube and most
-          social platforms. TikTok and Instagram may show a notice when they&rsquo;re
+          social platforms. Instagram may show a notice when it&rsquo;s
           temporarily refusing the download server.
         </p>
       </div>
