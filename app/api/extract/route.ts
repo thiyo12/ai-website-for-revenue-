@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { spawn, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
+import { mkdtemp, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { RateLimiter, getClientIp } from "../lib/rate";
@@ -255,6 +256,30 @@ function mapExtractError(platform: string): string {
   return PLATFORM_FALLBACKS[platform] ?? "This video could not be extracted. It may be unavailable or restricted.";
 }
 
+// Use the YouTube cookies. Priority:
+//   1) YOUTUBE_COOKIES_B64 - base64 of the cookies.txt contents, set as an env
+//      var in Dokploy. Survives redeploys with no volume or git changes.
+//   2) A cookies file on disk (COOKIES_DIR or /app/.cookies/youtube.txt) - for a
+//      mounted volume at deploy time.
+const cookieDir = process.env.COOKIES_DIR || path.join(process.cwd(), ".cookies");
+const youtubeCookies = path.join(cookieDir, "youtube.txt");
+
+async function resolveCookies(): Promise<string | null> {
+  const b64 = process.env.YOUTUBE_COOKIES_B64;
+  if (b64) {
+    try {
+      const dir = await mkdtemp(path.join(os.tmpdir(), "qt-cookies-"));
+      const file = path.join(dir, "youtube.txt");
+      await writeFile(file, Buffer.from(b64, "base64").toString("utf8"));
+      return file;
+    } catch {
+      return null;
+    }
+  }
+  if (existsSync(youtubeCookies)) return youtubeCookies;
+  return null;
+}
+
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const ip = getClientIp(req);
   if (extractLimiter.isLimited(ip)) {
@@ -300,15 +325,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   }
   const cert = resolveCertifi();
 
-  // Use the YouTube cookies (bundled in the image, or a mounted volume when
-  // COOKIES_DIR is set) to get past YouTube's datacenter-IP bot detection.
-  const cookieDir = process.env.COOKIES_DIR || path.join(process.cwd(), ".cookies");
-  const youtubeCookies = path.join(cookieDir, "youtube.txt");
-
-  const opts: { cookies: string | null; proxy: string | null } = { cookies: null, proxy: null };
-  if (existsSync(youtubeCookies)) {
-    opts.cookies = youtubeCookies;
-  }
+  const opts: { cookies: string | null; proxy: string | null } = {
+    cookies: hostEntry.platform === "youtube" ? await resolveCookies() : null,
+    proxy: null,
+  };
 
   const result = await runExtract(parsed.href, binary, cert, opts, hostEntry.platform);
   if (result.error || result.status || !result.data) {
