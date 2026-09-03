@@ -126,14 +126,14 @@ export default function RootLayout({
         {/* GOOGLE ANALYTICS 4 (gtag.js) */}
         <script
           async
-          src="https://www.googletagmanager.com/gtag/js?id=G-F3SQKWPTQB"
+          src="https://www.googletagmanager.com/gtag/js?id=G-9TN9YGWPW2"
         />
         <script
           dangerouslySetInnerHTML={{
             __html: `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'G-F3SQKWPTQB');`,
+gtag('config', 'G-9TN9YGWPW2');`,
           }}
         />
 
