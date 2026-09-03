@@ -4,6 +4,83 @@ import AdSlot from "@/components/AdSlot";
 
 const tools = [
   {
+    href: "/signature-generator",
+    name: "Signature Generator",
+    description:
+      "Draw or type an electronic signature and download it as a transparent PNG.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l1.5-1.5M3 21v-1M6 17l1.5-1.5M6 21v-1M9 17c1.5 0 2 .5 3 1 1.5.7 3 1.5 4 1 1.5-.7 3-3.5 5-6M14 4l3 4-4 5-2 2" />
+      </svg>
+    ),
+  },
+  {
+    href: "/invoice-generator",
+    name: "Invoice Generator",
+    description:
+      "Create a professional invoice with itemized lines and download it as a PDF.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/resume-builder",
+    name: "Resume Builder",
+    description:
+      "Build a professional resume from your experience and skills, then download it as a PDF.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/meme-generator",
+    name: "Meme Generator",
+    description:
+      "Upload an image or use a template, add classic top and bottom text, and download a meme.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/text-to-handwriting",
+    name: "Text to Handwriting",
+    description:
+      "Turn typed text into a realistic handwritten-style note and download as PNG or PDF.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l1.5-1.5M3 21v-1M6 17l1.5-1.5M6 21v-1M9 17c1.5 0 2 .5 3 1 1.5.7 3 1.5 4 1 1.5-.7 3-3.5 5-6M14 4l3 4-4 5-2 2" />
+      </svg>
+    ),
+  },
+  {
+    href: "/random-name-picker",
+    name: "Random Name Picker",
+    description:
+      "Pick a random winner from a list and remove each pick for fair giveaways.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 19.5 7.1 18.2l.9-5.5-4-3.9L9.5 8 12 3z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/countdown-timer-generator",
+    name: "Countdown Timer · Giveaway",
+    description:
+      "Create a live countdown to a future date, then share it with a link.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
     href: "/image-compressor",
     name: "Image Compressor",
     description:
@@ -269,6 +346,64 @@ const tools = [
   },
 ];
 
+const funTools = [
+  {
+    href: "/fake-whatsapp-chat",
+    name: "Fake WhatsApp Chat",
+    description:
+      "Create a realistic-looking WhatsApp-style chat mockup and download it as a PNG.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h8M8 14h5M21 12a9 9 0 11-3-6.7L21 4l-1 4a8.6 8.6 0 011 4z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/fake-tweet-generator",
+    name: "Fake Tweet Generator",
+    description:
+      "Create a realistic-looking tweet mockup with likes and retweets, exported as PNG.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 3h8l-6 9v6l-4-3V3zM16 11l3 3v7l-4-3M12 15l3 3" />
+      </svg>
+    ),
+  },
+  {
+    href: "/fake-notification-generator",
+    name: "Fake Notification Generator",
+    description:
+      "Create a realistic-looking phone notification mockup and download it as a PNG.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+      </svg>
+    ),
+  },
+  {
+    href: "/fake-caller-id-generator",
+    name: "Fake Caller ID",
+    description:
+      "Create a realistic incoming-call screen mockup and download it as a PNG.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h2.5a1 1 0 01.9.55l1.3 2.6a1 1 0 01-.1 1.05L8 9.5a15 15 0 006.5 6.5l1.3-1.6a1 1 0 011.06-.1l2.6 1.3a1 1 0 01.54.9V19a2 2 0 01-2 2h-1C9.7 21 3 14.3 3 6V5z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/receipt-generator",
+    name: "Receipt Generator",
+    description:
+      "Create a realistic thermal-print-style receipt mockup and download it as a PNG.",
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 2h12v20l-2-2-2 2-2-2-2 2-2-2-2 2V2zM9 7h6M9 11h6" />
+      </svg>
+    ),
+  },
+];
+
 const games = [
   {
     href: "/daily-word-game",
@@ -449,6 +584,25 @@ export default function HomePage() {
 
         {/* Inline ad inside the tools grid */}
         <AdSlot label="inline" className="col-span-full mt-2" />
+      </section>
+
+      <section
+        aria-labelledby="fun-tools-heading"
+        className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3"
+      >
+        <h2
+          id="fun-tools-heading"
+          className="col-span-full mb-2 text-2xl font-bold tracking-tight text-gray-900"
+        >
+          Fun & Mockup Tools
+        </h2>
+        <p className="col-span-full -mt-2 text-sm text-gray-500">
+          Create realistic mockups for entertainment — fake chats, tweets,
+          notifications, caller IDs, and receipts.
+        </p>
+        {funTools.map((tool) => (
+          <ToolCard key={tool.href} {...tool} />
+        ))}
       </section>
 
       {/* Inline ad slot between tools and games */}

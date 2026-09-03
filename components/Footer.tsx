@@ -38,6 +38,9 @@ export default function Footer() {
           <Link href="/privacy" className="transition-colors hover:text-accent-600">
             Privacy Policy
           </Link>
+          <Link href="/terms-of-service" className="transition-colors hover:text-accent-600">
+            Terms of Service
+          </Link>
           <Link href="/restore-access" className="transition-colors hover:text-accent-600">
             Restore Access
           </Link>

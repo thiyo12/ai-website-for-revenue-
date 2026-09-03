@@ -27,6 +27,18 @@ const NAMES: Record<string, string> = {
   "/social-media-video-compressor": "Social Media Video Compressor",
   "/username-generator": "Username Generator",
   "/social-media-caption-generator": "Caption Generator",
+  "/signature-generator": "Signature Generator",
+  "/invoice-generator": "Invoice Generator",
+  "/resume-builder": "Resume Builder",
+  "/countdown-timer-generator": "Countdown Timer",
+  "/random-name-picker": "Random Name Picker",
+  "/text-to-handwriting": "Text to Handwriting",
+  "/meme-generator": "Meme Generator",
+  "/fake-whatsapp-chat": "Fake WhatsApp Chat",
+  "/fake-tweet-generator": "Fake Tweet Generator",
+  "/fake-notification-generator": "Fake Notification Generator",
+  "/fake-caller-id-generator": "Fake Caller ID",
+  "/receipt-generator": "Receipt Generator",
 };
 
 const RELATED: Record<string, string[]> = {
@@ -53,6 +65,18 @@ const RELATED: Record<string, string[]> = {
   "/social-media-video-compressor": ["/video-to-gif", "/aspect-ratio-cropper", "/image-compressor"],
   "/username-generator": ["/social-media-caption-generator", "/text-to-speech", "/color-palette-generator"],
   "/social-media-caption-generator": ["/text-to-speech", "/username-generator", "/word-counter"],
+  "/signature-generator": ["/text-to-handwriting", "/resume-builder", "/invoice-generator"],
+  "/invoice-generator": ["/resume-builder", "/signature-generator", "/countdown-timer-generator"],
+  "/resume-builder": ["/invoice-generator", "/signature-generator", "/text-to-handwriting"],
+  "/countdown-timer-generator": ["/random-name-picker", "/meme-generator", "/invoice-generator"],
+  "/random-name-picker": ["/countdown-timer-generator", "/meme-generator", "/username-generator"],
+  "/text-to-handwriting": ["/signature-generator", "/resume-builder", "/text-to-speech"],
+  "/meme-generator": ["/fake-tweet-generator", "/random-name-picker", "/fake-notification-generator"],
+  "/fake-whatsapp-chat": ["/fake-tweet-generator", "/fake-notification-generator", "/fake-caller-id-generator"],
+  "/fake-tweet-generator": ["/fake-whatsapp-chat", "/fake-notification-generator", "/meme-generator"],
+  "/fake-notification-generator": ["/fake-whatsapp-chat", "/fake-tweet-generator", "/fake-caller-id-generator"],
+  "/fake-caller-id-generator": ["/fake-notification-generator", "/receipt-generator", "/fake-whatsapp-chat"],
+  "/receipt-generator": ["/fake-caller-id-generator", "/invoice-generator", "/fake-whatsapp-chat"],
 };
 
 export default function RelatedTools() {
