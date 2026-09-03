@@ -83,6 +83,22 @@ Covers the "Quiktools.cc AI SEO Growth Agent" program. Only quictools.cc is touc
 
 ---
 
+### 9. Follow-up: restore-access noindexed (batch 1 cleanup)
+- `restore-access` is a client action/support page with no SEO value but was being
+  indexed (it fell into the old sitemap). Added `app/restore-access/layout.tsx`
+  with `robots: { index: false, follow: false }` and excluded it from the sitemap.
+- Verified rendered `<meta name="robots" content="noindex, nofollow"/>` and its
+  removal from `sitemap-0.xml`.
+- **Files:** `app/restore-access/layout.tsx` (new), `next-sitemap.config.js`.
+
+### Coverage verification (batch 1)
+- All 54 content pages (36 tool + homepage + games + info) emit a canonical in
+  `<head>` (confirmed in prerendered HTML; none in `<body>`), no hreflang links in
+  body, breadcrumb + WebApplication schema on tool pages.
+- All 91 sitemap URLs map to real routes; every app page is in the sitemap except
+  the intentionally-noindexed restore-access.
+- Duplicate-title/description scan clean.
+
 ## Not yet done (future)
 - Internationalization (hreflang beyond en/x-default) — deliberately deferred; avoid
   low-quality MT. Enable later once English funnel + measurement are solid.
