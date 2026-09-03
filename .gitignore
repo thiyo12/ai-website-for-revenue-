@@ -12,6 +12,7 @@ npm-debug.log*
 next-env.d.ts
 
 /lib/generated/prisma
+/.cookies/
 dev.db
 dev.db-journal
 *.db-shm

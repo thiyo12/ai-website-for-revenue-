@@ -351,21 +351,27 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   }
   const cert = resolveCertifi();
 
+  // Use the cookies files bundled into the image via the Docker build
+  // (.cookies/). They live at the standalone app root at runtime.
+  const cookieDir = path.join(process.cwd(), ".cookies");
+  const youtubeCookies = path.join(cookieDir, "youtube.txt");
+  const instagramCookies = path.join(cookieDir, "instagram.txt");
+
   let opts: { cookies: string | null; proxy: string | null } = { cookies: null, proxy: null };
-  if (hostEntry.platform === "youtube" || hostEntry.platform === "instagram") {
-    const cookiePath =
-      hostEntry.platform === "youtube"
-        ? process.env.YOUTUBE_COOKIES_FILE
-        : undefined;
-    if (cookiePath && existsSync(cookiePath)) opts.cookies = cookiePath;
+  if (hostEntry.platform === "youtube" && existsSync(youtubeCookies)) {
+    opts.cookies = youtubeCookies;
   }
   if (hostEntry.platform === "instagram") {
-    try {
-      const session = await getMediaSession();
-      opts.cookies = opts.cookies ?? session.instagramCookieJar;
-      opts.proxy = session.proxy;
-    } catch {
-      // If the session harvester fails (e.g. browser not available), fall back to no cookies.
+    if (existsSync(instagramCookies)) {
+      opts.cookies = instagramCookies;
+    } else {
+      try {
+        const session = await getMediaSession();
+        opts.cookies = opts.cookies ?? session.instagramCookieJar;
+        opts.proxy = session.proxy;
+      } catch {
+        // If the session harvester fails (e.g. browser not available), fall back to no cookies.
+      }
     }
   }
 

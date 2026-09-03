@@ -54,6 +54,10 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
+# Bundle the login cookies for YouTube/Instagram extraction into the image so a
+# redeploy ships fresh session tokens without any server-side file transfer.
+COPY .cookies /app/.cookies/
+
 USER node
 EXPOSE 3000
 CMD ["node", "server.js"]
