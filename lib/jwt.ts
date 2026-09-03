@@ -1,8 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
-import { ENV } from "./env";
+import { SERVER_ENV } from "./env.server";
 
 const secret = () => {
-  const s = ENV.JWT_SECRET || process.env.JWT_SECRET || "";
+  const s = SERVER_ENV.JWT_SECRET || process.env.JWT_SECRET || "";
   if (!s) throw new Error("JWT_SECRET is required");
   return new TextEncoder().encode(s);
 };
@@ -31,6 +31,6 @@ export function unlockCookieAttrs(): Record<string, string | number | boolean> {
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
-    ...(ENV.COOKIE_DOMAIN ? { domain: ENV.COOKIE_DOMAIN } : {}),
+    ...(SERVER_ENV.COOKIE_DOMAIN ? { domain: SERVER_ENV.COOKIE_DOMAIN } : {}),
   };
 }

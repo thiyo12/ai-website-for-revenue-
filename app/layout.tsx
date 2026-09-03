@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdSlot from "@/components/AdSlot";
 import { GSC_VERIFICATION, BING_VERIFICATION, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
-import { ENV } from "@/lib/env";
+import { PUBLIC_ENV } from "@/lib/env.public";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -137,10 +137,10 @@ gtag('config', 'G-9TN9YGWPW2');`,
         />
 
         {/* GOOGLE ADSENSE - loaded from env when NEXT_PUBLIC_ADSENSE_ID is set */}
-        {ENV.ADSENSE_ID ? (
+        {PUBLIC_ENV.ADSENSE_ID ? (
           <script
             async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ENV.ADSENSE_ID}`}
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${PUBLIC_ENV.ADSENSE_ID}`}
             crossOrigin="anonymous"
           />
         ) : null}

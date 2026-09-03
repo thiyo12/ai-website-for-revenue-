@@ -104,3 +104,64 @@ Covers the "Quiktools.cc AI SEO Growth Agent" program. Only quictools.cc is touc
   low-quality MT. Enable later once English funnel + measurement are solid.
 - JPG→PNG / PNG→JPG / HEIC→JPG conversions require building new tools first.
 - Add `lastmod` only on real content changes (currently set on every build).
+- Next.js 15.x migration — the advisory ranges for the `next` npm advisories (SSRF,
+  cache poisoning, etc.) require >=15.5.x to be marked fixed; this app uses none of
+  the exploitable features (no Server Actions, no rewrites, no images.remotePatterns,
+  no WebSocket), so 14.2.35 is a documented, acceptable interim posture.
+
+---
+
+## Security Remediation Batch (this session)
+
+### HIGH — Eliminated the client-side env-secret foot-gun
+- Splitting `lib/env.ts` into:
+  - `lib/env.public.ts` → only `NEXT_PUBLIC_*` / public AdSense /site values.
+  - `lib/env.server.ts` → secrets (`LEMONSQUEEZY_API_KEY`, `JWT_SECRET`,
+    checkout URLs, `COOKIE_DOMAIN`, `DISABLE_USAGE_LIMIT`).
+- Deleted the bundled object. Updated all consumers:
+  - Client: `AdSlot.tsx` → now imports `PUBLIC_ENV` from `env.public` only.
+  - Server: `layout.tsx` (public), `api/usage`, `api/lemon-squeezy`, `lib/jwt`,
+    `lib/lemon`, `lib/usage` → import `SERVER_ENV` from `env.server`.
+- **Verified:** the actual `JWT_SECRET`/`LEMONSQUEEZY_API_KEY` VALUES are absent from
+  all client chunks and prerendered HTML; even the property-name references to the
+  secrets are gone from client bundles. `env.public.ts` contains no secret fields.
+- **Files:** `lib/env.public.ts` (new), `lib/env.server.ts` (new), `lib/env.ts`
+  (deleted), `components/AdSlot.tsx`, `app/layout.tsx`, `app/api/usage/route.ts`,
+  `app/api/lemon-squeezy/route.ts`, `lib/jwt.ts`, `lib/lemon.ts`, `lib/usage.ts`.
+
+### HIGH — Usage limit state made explicit (stays disabled)
+- `DISABLE_USAGE_LIMIT` is server-only now. It remains `true` (free-tools site).
+  No gate was silently enabled; flagged for the operator to flip when the paid path
+  is ready. `lib/usage.ts` returns `allowed:true, limit:999999` when disabled.
+
+### MEDIUM — Rate-limited previously-unthrottled endpoints
+- `/api/checkout` and `/api/exchange-rate` now use the shared `RateLimiter`
+  (30/min/IP) via `getClientIp`, mirroring `/api/usage`.
+- **Files:** `app/api/checkout/route.ts`, `app/api/exchange-rate/route.ts`.
+
+### MEDIUM — Next.js upgraded 14.2.15 → 14.2.35 (latest patched 14.2.x)
+- Covers interim patches without a React 19 / Async `params` migration.
+- **Note:** `npm audit` still lists the `next` advisories; ranges require >=15.5.x.
+  This app does not use the affected features (no Server Actions/rewrites/
+  images.remotePatterns/WebSocket), so this is an accepted, documented posture.
+  Full 15.x migration tracked under "Not yet done".
+- **Files:** `package.json`, `package-lock.json`.
+
+### MEDIUM — Added Edge-safe `middleware.ts` (CSRF + global gate)
+- For non-safe (`POST/PUT/DELETE/…`) requests to `/api/*`, rejects when
+  `Sec-Fetch-Site: cross-site` or a mismatched `Origin` is present. Non-browser
+  clients (Lemon Squeezy webhook, curl) send neither and are unaffected.
+- Dependency-free and Edge-safe (no Node imports). Only matches `/api/*`.
+- **Files:** `middleware.ts` (new).
+
+### LOW — Dependency & hygiene cleanups
+- `playwright` → moved to `devDependencies` (it is not imported by any runtime code;
+  avoids shipping a full Chromium in the production image).
+- `dotenv` removed (Next.js loads `.env` natively; it was unused).
+- `reactStrictMode` re-enabled (`true`).
+- **Files:** `package.json`, `package-lock.json`, `next.config.mjs`.
+
+### Known / accepted for this pass
+- CSP still allows `script-src 'unsafe-inline' 'unsafe-eval'` (required by Next.js,
+  AdSense, and html2canvas/jsPDF); not changed to avoid breaking ads/WASM tools.
+- In-memory `RateLimiter` resets on restart and is single-instance (fine for the VPS).

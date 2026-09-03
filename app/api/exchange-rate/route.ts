@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientIp, RateLimiter } from "../lib/rate";
 
 export const dynamic = "force-dynamic";
+
+const exchangeLimiter = new RateLimiter(30, 60_000);
 
 const CURRENCIES = [
   "USD", "EUR", "GBP", "JPY", "INR", "LKR",
@@ -8,6 +11,14 @@ const CURRENCIES = [
 ].join(",");
 
 export async function GET(request: NextRequest) {
+  const ip = getClientIp(request);
+  if (exchangeLimiter.isLimited(ip)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a minute and try again." },
+      { status: 429 }
+    );
+  }
+
   const rawBase = (request.nextUrl.searchParams.get("base") ?? "USD").toUpperCase();
 
   // Whitelist the base currency to prevent injecting arbitrary path segments /

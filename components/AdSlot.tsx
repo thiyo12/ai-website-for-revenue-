@@ -1,25 +1,25 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ENV } from "@/lib/env";
+import { PUBLIC_ENV } from "@/lib/env.public";
 
 const SLOT_MAP: Record<string, string> = {
-  header: ENV.ADSENSE_SLOT_HEADER,
-  top: ENV.ADSENSE_SLOT_TOP,
-  middle: ENV.ADSENSE_SLOT_MIDDLE,
-  bottom: ENV.ADSENSE_SLOT_BOTTOM,
-  inline: ENV.ADSENSE_SLOT_INLINE,
-  footer: ENV.ADSENSE_SLOT_FOOTER,
+  header: PUBLIC_ENV.ADSENSE_SLOT_HEADER,
+  top: PUBLIC_ENV.ADSENSE_SLOT_TOP,
+  middle: PUBLIC_ENV.ADSENSE_SLOT_MIDDLE,
+  bottom: PUBLIC_ENV.ADSENSE_SLOT_BOTTOM,
+  inline: PUBLIC_ENV.ADSENSE_SLOT_INLINE,
+  footer: PUBLIC_ENV.ADSENSE_SLOT_FOOTER,
 };
 
 function loadAdSenseScript() {
   if (typeof window === "undefined") return;
-  if (document.getElementById("adsense-script") || !ENV.ADSENSE_ID) return;
+  if (document.getElementById("adsense-script") || !PUBLIC_ENV.ADSENSE_ID) return;
   if (window.adsbygoogle) return;
   const s = document.createElement("script");
   s.id = "adsense-script";
   s.async = true;
-  s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ENV.ADSENSE_ID}`;
+  s.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${PUBLIC_ENV.ADSENSE_ID}`;
   s.crossOrigin = "anonymous";
   document.head.appendChild(s);
 }
@@ -43,7 +43,7 @@ export default function AdSlot({
 }) {
   const insRef = useRef<HTMLModElement>(null);
   const slotId = slot ? SLOT_MAP[slot] ?? "" : "";
-  const enabled = Boolean(ENV.ADSENSE_ID && slotId);
+  const enabled = Boolean(PUBLIC_ENV.ADSENSE_ID && slotId);
 
   useEffect(() => {
     if (!enabled) return;
@@ -64,7 +64,7 @@ export default function AdSlot({
           ref={insRef}
           className="adsbygoogle"
           style={{ display: "block", minHeight: compact ? 60 : 90, height: "auto" }}
-          data-ad-client={ENV.ADSENSE_ID}
+          data-ad-client={PUBLIC_ENV.ADSENSE_ID}
           data-ad-slot={slotId}
           data-ad-format="auto"
           data-full-width-responsive="true"

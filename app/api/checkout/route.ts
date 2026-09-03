@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkoutUrl } from "@/lib/lemon";
-import { getClientIp } from "../lib/rate";
+import { getClientIp, RateLimiter } from "../lib/rate";
+
+const checkoutLimiter = new RateLimiter(30, 60_000);
 
 const PRICE_LK = "$1.59";
 const PRICE_GLOBAL = "$3.49";
@@ -34,6 +36,14 @@ async function detectCountry(request: NextRequest): Promise<string> {
 }
 
 export async function GET(request: NextRequest) {
+  const ip = getClientIp(request);
+  if (checkoutLimiter.isLimited(ip)) {
+    return NextResponse.json(
+      { error: "Too many requests. Please wait a minute and try again." },
+      { status: 429 }
+    );
+  }
+
   const country = await detectCountry(request);
   const variant = country === "LK" ? "LK" : "Global";
   const price = variant === "LK" ? PRICE_LK : PRICE_GLOBAL;

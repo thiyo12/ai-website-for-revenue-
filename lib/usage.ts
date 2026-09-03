@@ -1,12 +1,12 @@
 import { sha256 } from "./hash";
 import prisma from "./prisma";
-import { ENV } from "./env";
+import { SERVER_ENV } from "./env.server";
 
 export async function checkUsageLimit(
   fingerprint: string,
   ip: string
 ): Promise<{ allowed: boolean; used: number; limit: number; remaining: number }> {
-  if (ENV.DISABLE_USAGE_LIMIT) {
+  if (SERVER_ENV.DISABLE_USAGE_LIMIT) {
     return { allowed: true, used: 0, limit: 999999, remaining: 999999 };
   }
 

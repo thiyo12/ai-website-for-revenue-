@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { ENV } from "@/lib/env";
+import { SERVER_ENV } from "@/lib/env.server";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 function validSignature(rawBody: string, signature: string | null): boolean {
   if (!signature) return false;
   const sig = signature.replace(/^sha256=/, "");
-  const expected = createHmac("sha256", ENV.LEMONSQUEEZY_API_KEY).update(rawBody).digest();
+  const expected = createHmac("sha256", SERVER_ENV.LEMONSQUEEZY_API_KEY).update(rawBody).digest();
   let sigBuf: Buffer;
   try {
     sigBuf = Buffer.from(sig, "hex");

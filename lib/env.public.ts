@@ -1,4 +1,9 @@
-export const ENV = {
+/**
+ * PUBLIC environment variables — safe to bundle into client JavaScript.
+ * Only reference NEXT_PUBLIC_* (or otherwise intentionally public) values here.
+ * Do NOT add server secrets (API keys, JWT secrets, DB URLs) to this module.
+ */
+export const PUBLIC_ENV = {
   SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL ?? "",
   SITE_NAME: process.env.SITE_NAME ?? "QuicTools",
   ADSENSE_ID: process.env.NEXT_PUBLIC_ADSENSE_ID ?? "ca-pub-3655016924906610",
@@ -8,10 +13,4 @@ export const ENV = {
   ADSENSE_SLOT_BOTTOM: process.env.NEXT_PUBLIC_ADSENSE_SLOT_BOTTOM ?? "",
   ADSENSE_SLOT_INLINE: process.env.NEXT_PUBLIC_ADSENSE_SLOT_INLINE ?? "",
   ADSENSE_SLOT_FOOTER: process.env.NEXT_PUBLIC_ADSENSE_SLOT_FOOTER ?? "",
-  LEMONSQUEEZY_CHECKOUT_LK: process.env.LEMONSQUEEZY_CHECKOUT_LK ?? "",
-  LEMONSQUEEZY_CHECKOUT_GLOBAL: process.env.LEMONSQUEEZY_CHECKOUT_GLOBAL ?? "",
-  LEMONSQUEEZY_API_KEY: process.env.LEMONSQUEEZY_API_KEY ?? "",
-  JWT_SECRET: process.env.JWT_SECRET ?? "",
-  COOKIE_DOMAIN: process.env.COOKIE_DOMAIN ?? "",
-  DISABLE_USAGE_LIMIT: process.env.DISABLE_USAGE_LIMIT !== "false",
 } as const;

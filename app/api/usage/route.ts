@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkUsageLimit, recordUsage } from "@/lib/usage";
 import { verifyUnlockToken } from "@/lib/jwt";
-import { ENV } from "@/lib/env";
+import { SERVER_ENV } from "@/lib/env.server";
 import { RateLimiter, getClientIp } from "../lib/rate";
 
 const usageLimiter = new RateLimiter(30, 60_000);
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (ENV.DISABLE_USAGE_LIMIT) {
+  if (SERVER_ENV.DISABLE_USAGE_LIMIT) {
     return NextResponse.json({
       allowed: true,
       used: 0,

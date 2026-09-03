@@ -1,4 +1,4 @@
-import { ENV } from "./env";
+import { SERVER_ENV } from "./env.server";
 
 const BASE = "https://api.lemonsqueezy.com";
 
@@ -6,7 +6,7 @@ async function lemonsqueezyHeaders(): Promise<Record<string, string>> {
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
-    Authorization: `Bearer ${ENV.LEMONSQUEEZY_API_KEY}`,
+    Authorization: `Bearer ${SERVER_ENV.LEMONSQUEEZY_API_KEY}`,
   };
 }
 
@@ -23,6 +23,6 @@ export async function lsPost(path: string, body: unknown): Promise<Response> {
 }
 
 export function checkoutUrl(variant: "LK" | "Global"): string {
-  if (variant === "LK") return ENV.LEMONSQUEEZY_CHECKOUT_LK;
-  return ENV.LEMONSQUEEZY_CHECKOUT_GLOBAL;
+  if (variant === "LK") return SERVER_ENV.LEMONSQUEEZY_CHECKOUT_LK;
+  return SERVER_ENV.LEMONSQUEEZY_CHECKOUT_GLOBAL;
 }
