@@ -53,18 +53,15 @@ function formatDuration(sec?: number): string {
 
 // Route downloads through the server so the browser receives the file as an
 // attachment (real download) instead of opening the remote media in a new tab.
+// All video downloads go through /api/download/merged, which re-encodes to
+// H.264/AAC so the saved MP4 plays everywhere on mobile (old iOS Safari and
+// Android), even when the source ships with an unplayable codec like VP9/HEVC
+// or as separate video+audio streams (common on Instagram reels).
 function proxyHref(downloadUrl: string, audioUrl?: string | null, title?: string, videoOnly?: boolean): string {
   const q = new URLSearchParams({ url: downloadUrl });
-  // When the source is delivered as separate video + audio streams (common for
-  // Instagram reels), have the server merge them into one mobile-playable MP4
-  // so the download plays on phones instead of a silent/incompatible file.
-  if (videoOnly && audioUrl) {
-    q.set("audio", audioUrl);
-    if (title) q.set("title", title);
-    return `/api/download/merged?${q.toString()}`;
-  }
+  if (audioUrl && videoOnly) q.set("audio", audioUrl);
   if (title) q.set("title", title);
-  return `/api/download?${q.toString()}`;
+  return `/api/download/merged?${q.toString()}`;
 }
 
 export default function SocialMediaVideoDownloader() {

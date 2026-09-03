@@ -58,19 +58,45 @@ function sanitizeFilename(name: string, ext: string): string {
   return `${clean || "video"}.${ext}`;
 }
 
-function runFfmpegMerge(video: string, audio: string, output: string): Promise<{ code: number; stderr: string }> {
+function runFfmpegMerge(video: string, audio: string | null, output: string): Promise<{ code: number; stderr: string }> {
   return new Promise((resolve) => {
-    const args = [
-      "-y",
-      "-i", video,
-      "-i", audio,
-      "-c:v", "copy",
-      "-c:a", "aac",
-      "-b:a", "192k",
-      "-shortest",
-      "-movflags", "+faststart",
-      output,
-    ];
+    // Re-encode to H.264 + AAC so the MP4 plays everywhere on mobile,
+    // including older iOS Safari and Android. Blind "-c:v copy" would keep
+    // an unplayable source codec (HEVC/VP9) in an .mp4 container.
+    const args = audio
+      ? [
+          "-y",
+          "-i", video,
+          "-i", audio,
+          "-vf", "format=yuv420p",
+          "-c:v", "libx264",
+          "-profile:v", "baseline",
+          "-level", "3.0",
+          "-preset", "medium",
+          "-crf", "22",
+          "-pix_fmt", "yuv420p",
+          "-c:a", "aac",
+          "-b:a", "192k",
+          "-shortest",
+          "-movflags", "+faststart",
+          "-max_muxing_queue_size", "2048",
+          output,
+        ]
+      : [
+          "-y",
+          "-i", video,
+          "-vf", "format=yuv420p",
+          "-c:v", "libx264",
+          "-profile:v", "baseline",
+          "-level", "3.0",
+          "-preset", "medium",
+          "-crf", "22",
+          "-pix_fmt", "yuv420p",
+          "-c:a", "aac",
+          "-b:a", "192k",
+          "-movflags", "+faststart",
+          output,
+        ];
     const child = spawn("ffmpeg", args, { stdio: ["ignore", "pipe", "pipe"] });
     let stderr = "";
     child.stderr.on("data", (d: Buffer) => {
@@ -113,9 +139,9 @@ export async function GET(req: NextRequest): Promise<Response> {
 
   const range = req.headers.get("range");
 
-  // No audio supplied (or a range request): behave exactly like the simple proxy,
-  // but still guard against private hosts.
-  if (!audio || range) {
+  // Range requests come from in-page players that need byte seeking, which a
+  // re-encode cannot satisfy, so passthrough the original stream for those.
+  if (range) {
     try {
       await assertPublicHost(video.hostname);
     } catch {
@@ -126,7 +152,7 @@ export async function GET(req: NextRequest): Promise<Response> {
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
       Accept: "*/*",
     };
-    if (range) upstreamHeaders.Range = range;
+    upstreamHeaders.Range = range;
     const upstream = await fetch(video, { headers: upstreamHeaders, redirect: "follow" });
     if (!upstream.ok && upstream.status !== 206) {
       return new Response("The source rejected the request.", { status: 502 });
@@ -141,19 +167,35 @@ export async function GET(req: NextRequest): Promise<Response> {
     return new Response(upstream.body, { status: upstream.status, headers: out });
   }
 
-  // Full merge path: video + audio -> mp4
+  // Merge/re-encode path: always re-encode to H.264/AAC so the saved MP4 plays
+  // on mobile. Uses two inputs (video + audio) when audio is provided, or one
+  // input (combined source) otherwise.
   const dir = await mkdtemp(path.join(os.tmpdir(), "qt-merge-"));
   const videoFile = path.join(dir, "v" + path.extname(video.pathname).slice(0, 8) || ".mp4");
-  const audioFile = path.join(dir, "a" + (path.extname(audio.pathname).slice(0, 8) || ".m4a"));
+  const audioFile = audio ? path.join(dir, "a" + path.extname(audio.pathname).slice(0, 8) || ".m4a") : null;
   const output = path.join(dir, "out.mp4");
 
   try {
-    await Promise.all([
-      fetchFile(video, { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36", Accept: "*/*" }, videoFile, AbortSignal.timeout(120_000)),
-      fetchFile(audio, { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36", Accept: "*/*" }, audioFile, AbortSignal.timeout(120_000)),
-    ]);
+    await assertPublicHost(video.hostname);
+    const fetchVideo = fetchFile(
+      video,
+      { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36", Accept: "*/*" },
+      videoFile,
+      AbortSignal.timeout(120_000)
+    );
+    let fetchAudio: Promise<void> | null = null;
+    if (audio && audioFile) {
+      await assertPublicHost(audio.hostname);
+      fetchAudio = fetchFile(
+        audio,
+        { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36", Accept: "*/*" },
+        audioFile,
+        AbortSignal.timeout(120_000)
+      );
+    }
+    await Promise.all([fetchVideo, fetchAudio].filter((p): p is Promise<void> => !!p));
 
-    const { code, stderr } = await runFfmpegMerge(videoFile, audioFile, output);
+    const { code, stderr } = await runFfmpegMerge(videoFile, audio ? audioFile : null, output);
     if (code !== 0) {
       console.error("ffmpeg merge failed:", stderr.slice(-500));
       return new Response("The source media could not be combined. Try downloading video and audio separately.", { status: 502 });
