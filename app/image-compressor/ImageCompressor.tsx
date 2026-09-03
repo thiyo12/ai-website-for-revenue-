@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import imageCompression from "browser-image-compression";
+import AdGate from "@/components/AdGate";
 import PaywallModal from "@/components/PaywallModal";
 
 function formatBytes(bytes: number): string {
@@ -167,13 +168,20 @@ export default function ImageCompressor() {
 
       {compressed && (
         <div className="flex flex-col items-center gap-4 pt-2 sm:flex-row">
-          <a
-            href={URL.createObjectURL(compressed)}
-            download={`compressed-${compressed.name}`}
+          <AdGate
+            onAction={() => {
+              const url = URL.createObjectURL(compressed);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `compressed-${compressed.name}`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+            buttonLabel="Download"
             className="w-full rounded-lg bg-accent-600 px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-accent-700 sm:w-auto"
           >
             Download compressed image
-          </a>
+          </AdGate>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}

@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { createWorker } from "tesseract.js";
+import AdGate from "@/components/AdGate";
 import PaywallModal from "@/components/PaywallModal";
 
 export default function ImageToTextOcr() {
@@ -134,13 +135,13 @@ export default function ImageToTextOcr() {
             >
               {copied ? "Copied!" : "Copy text"}
             </button>
-            <button
-              type="button"
-              onClick={download}
+            <AdGate
+              onAction={download}
+              buttonLabel="Download"
               className="rounded-lg border border-accent-200 px-5 py-2.5 text-sm font-semibold text-accent-700 transition-colors hover:bg-accent-50"
             >
               Download .txt
-            </button>
+            </AdGate>
           </div>
         </div>
       )}

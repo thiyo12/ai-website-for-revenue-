@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import PaywallModal from "@/components/PaywallModal";
+import AdGate from "@/components/AdGate";
 
 const RATIOS: Record<string, string> = {
   "1:1": "1:1",
@@ -207,13 +208,20 @@ export default function AspectRatioCropper() {
             {processing ? "Cropping…" : `Crop to ${ratioKey}`}
           </button>
           {resultUrl && (
-            <a
-              href={resultUrl}
-              download={`cropped-${ratioKey.replace(":", "x")}.jpg`}
+            <AdGate
+              onAction={() => {
+                const a = document.createElement("a");
+                a.href = resultUrl;
+                a.download = `cropped-${ratioKey.replace(":", "x")}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              }}
+              buttonLabel="Download"
               className="flex-1 rounded-lg border border-gray-300 bg-white px-6 py-3 text-center text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
             >
               Download image
-            </a>
+            </AdGate>
           )}
         </div>
       )}

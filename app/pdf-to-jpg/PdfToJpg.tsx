@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist";
+import AdGate from "@/components/AdGate";
 import PaywallModal from "@/components/PaywallModal";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
@@ -167,14 +168,17 @@ export default function PdfToJpg() {
         <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">{success}</p>
       )}
 
-      <button
-        type="button"
-        onClick={convert}
-        disabled={!file || pageCount === 0 || converting}
-        className="w-full rounded-lg bg-accent-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-700 disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto"
+      <div
+        className={!file || pageCount === 0 || converting ? "pointer-events-none opacity-50" : ""}
       >
-        {converting ? "Converting…" : `Convert ${pageCount || 0} pages to JPG`}
-      </button>
+        <AdGate
+          onAction={convert}
+          buttonLabel="Convert"
+          className="w-full rounded-lg bg-accent-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-700 disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto"
+        >
+          {converting ? "Converting…" : `Convert ${pageCount || 0} pages to JPG`}
+        </AdGate>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import PaywallModal from "@/components/PaywallModal";
+import AdGate from "@/components/AdGate";
 
 export default function TextToSpeech() {
   const [text, setText] = useState("");
@@ -182,13 +183,15 @@ export default function TextToSpeech() {
         >
           {speaking ? "Stop" : "Listen"}
         </button>
-        <button
-          onClick={download}
-          disabled={downloading}
-          className="flex-1 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
-        >
-          {downloading ? "Generating…" : "Download MP3"}
-        </button>
+        <div className={downloading ? "pointer-events-none opacity-50" : ""}>
+          <AdGate
+            onAction={download}
+            buttonLabel="Download"
+            className="flex-1 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+          >
+            {downloading ? "Generating…" : "Download MP3"}
+          </AdGate>
+        </div>
       </div>
     </div>
   );

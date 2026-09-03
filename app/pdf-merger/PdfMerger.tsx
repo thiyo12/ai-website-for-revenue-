@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
+import AdGate from "@/components/AdGate";
 import PaywallModal from "@/components/PaywallModal";
 
 interface PdfFile {
@@ -202,14 +203,17 @@ export default function PdfMerger() {
         </p>
       )}
 
-      <button
-        type="button"
-        onClick={merge}
-        disabled={files.length < 2 || merging}
-        className="w-full rounded-lg bg-accent-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-700 disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto"
+      <div
+        className={files.length < 2 || merging ? "pointer-events-none opacity-50" : ""}
       >
-        {merging ? "Merging…" : `Merge ${files.length || 0} PDFs`}
-      </button>
+        <AdGate
+          onAction={merge}
+          buttonLabel="Merge PDFs"
+          className="w-full rounded-lg bg-accent-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-700 disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto"
+        >
+          {merging ? "Merging…" : `Merge ${files.length || 0} PDFs`}
+        </AdGate>
+      </div>
     </div>
   );
 }

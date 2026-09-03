@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import PaywallModal from "@/components/PaywallModal";
+import AdGate from "@/components/AdGate";
 
 const PRESETS: Record<string, { label: string; width: number; height: number }> = {
   "Instagram Post": { label: "Instagram Post (1080x1080)", width: 1080, height: 1080 },
@@ -202,13 +203,20 @@ export default function SocialMediaImageResizer() {
             {processing ? "Resizing…" : `Resize to ${dims.width}x${dims.height}`}
           </button>
           {resultUrl && (
-            <a
-              href={resultUrl}
-              download={`resized-${dims.width}x${dims.height}.jpg`}
+            <AdGate
+              onAction={() => {
+                const a = document.createElement("a");
+                a.href = resultUrl;
+                a.download = `resized-${dims.width}x${dims.height}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              }}
+              buttonLabel="Download"
               className="flex-1 rounded-lg border border-gray-300 bg-white px-6 py-3 text-center text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
             >
               Download image
-            </a>
+            </AdGate>
           )}
         </div>
       )}

@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { getFFmpeg, formatBytes } from "@/lib/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 import PaywallModal from "@/components/PaywallModal";
+import AdGate from "@/components/AdGate";
 
 const PRESETS: Record<string, { label: string; scale: string; crf: string }> = {
   Instagram: { label: "Instagram (1080p)", scale: "1080:-2", crf: "28" },
@@ -211,13 +212,20 @@ export default function SocialMediaVideoCompressor() {
             from {formatBytes(originalSize)} ({savings}% smaller)
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <a
-              href={resultUrl}
-              download="compressed.mp4"
+            <AdGate
+              onAction={() => {
+                const a = document.createElement("a");
+                a.href = resultUrl;
+                a.download = "compressed.mp4";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              }}
+              buttonLabel="Download"
               className="flex-1 rounded-lg bg-accent-600 px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-accent-700"
             >
               Download video
-            </a>
+            </AdGate>
             <button
               onClick={() => {
                 setFile(null);

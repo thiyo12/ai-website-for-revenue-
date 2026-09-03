@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { getFFmpeg, formatBytes } from "@/lib/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 import PaywallModal from "@/components/PaywallModal";
+import AdGate from "@/components/AdGate";
 
 export default function VideoToGif() {
   const [file, setFile] = useState<File | null>(null);
@@ -183,13 +184,20 @@ export default function VideoToGif() {
             Size: <span className="font-medium text-accent-600">{formatBytes(resultSize)}</span>
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <a
-              href={resultUrl}
-              download="animation.gif"
+            <AdGate
+              onAction={() => {
+                const a = document.createElement("a");
+                a.href = resultUrl;
+                a.download = "animation.gif";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+              }}
+              buttonLabel="Download"
               className="flex-1 rounded-lg bg-accent-600 px-6 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-accent-700"
             >
               Download GIF
-            </a>
+            </AdGate>
             <button
               onClick={() => {
                 setFile(null);

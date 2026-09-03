@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import PaywallModal from "@/components/PaywallModal";
+import AdGate from "@/components/AdGate";
 
 interface ImglyModule {
   removeBackground: (input: Blob) => Promise<Blob>;
@@ -111,13 +112,13 @@ export default function BackgroundRemover() {
                 <p className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-500">Result</p>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={result} alt="Background removed" className="mx-auto max-h-64 object-contain" />
-                <button
-                  type="button"
-                  onClick={download}
+                <AdGate
+                  onAction={download}
+                  buttonLabel="Download"
                   className="mt-3 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-700"
                 >
                   Download PNG
-                </button>
+                </AdGate>
               </div>
             )
           )}

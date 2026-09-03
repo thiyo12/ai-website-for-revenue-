@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
+import AdGate from "@/components/AdGate";
 import PaywallModal from "@/components/PaywallModal";
 
 interface ImgEntry {
@@ -224,14 +225,17 @@ export default function JpgToPdf() {
         <p className="rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">{success}</p>
       )}
 
-      <button
-        type="button"
-        onClick={generate}
-        disabled={images.length === 0 || generating}
-        className="w-full rounded-lg bg-accent-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-700 disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto"
+      <div
+        className={images.length === 0 || generating ? "pointer-events-none opacity-50" : ""}
       >
-        {generating ? "Generating…" : `Create PDF (${images.length || 0} images)`}
-      </button>
+        <AdGate
+          onAction={generate}
+          buttonLabel="Create PDF"
+          className="w-full rounded-lg bg-accent-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-700 disabled:cursor-not-allowed disabled:bg-gray-300 sm:w-auto"
+        >
+          {generating ? "Generating…" : `Create PDF (${images.length || 0} images)`}
+        </AdGate>
+      </div>
     </div>
   );
 }
