@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkUsageLimit, recordUsage } from "@/lib/usage";
 import { verifyUnlockToken } from "@/lib/jwt";
+import { ENV } from "@/lib/env";
 import { RateLimiter, getClientIp } from "../lib/rate";
 
 const usageLimiter = new RateLimiter(30, 60_000);
@@ -12,6 +13,16 @@ export async function POST(request: NextRequest) {
       { error: "Too many requests. Please wait a minute and try again." },
       { status: 429 }
     );
+  }
+
+  if (ENV.DISABLE_USAGE_LIMIT) {
+    return NextResponse.json({
+      allowed: true,
+      used: 0,
+      limit: 999999,
+      remaining: 999999,
+      unlocked: false,
+    });
   }
 
   try {
