@@ -351,9 +351,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   }
   const cert = resolveCertifi();
 
-  // Use the cookies files bundled into the image via the Docker build
-  // (.cookies/). They live at the standalone app root at runtime.
-  const cookieDir = path.join(process.cwd(), ".cookies");
+  // Use the cookies files bundled into the image (or a mounted volume when
+  // COOKIES_DIR is set on the server). They live in the container at runtime.
+  const cookieDir = process.env.COOKIES_DIR || path.join(process.cwd(), ".cookies");
   const youtubeCookies = path.join(cookieDir, "youtube.txt");
   const instagramCookies = path.join(cookieDir, "instagram.txt");
 

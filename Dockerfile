@@ -54,9 +54,11 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Bundle the login cookies for YouTube/Instagram extraction into the image so a
-# redeploy ships fresh session tokens without any server-side file transfer.
-COPY .cookies /app/.cookies/
+# Cookies for YouTube/Instagram extraction are expected at /app/.cookies/ at
+# runtime. They are NOT baked into the image (they are gitignored to avoid
+# leaking login tokens). Mount/populate that directory at deploy time, or set
+# COOKIES_DIR to an alternate path on the server.
+RUN mkdir -p /app/.cookies
 
 USER node
 EXPOSE 3000
