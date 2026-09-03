@@ -47,18 +47,6 @@ const ERROR_MESSAGES: Record<string, string> = {
 
 const SUPPORTED_PLATFORMS = [
   { name: "YouTube", icon: "▶" },
-  { name: "Facebook", icon: "f" },
-  { name: "Instagram", icon: "◎" },
-  { name: "X / Twitter", icon: "𝕏" },
-  { name: "Reddit", icon: "r" },
-  { name: "Pinterest", icon: "p" },
-  { name: "Snapchat", icon: "✦" },
-  { name: "Twitch", icon: "▶" },
-  { name: "Dailymotion", icon: "▶" },
-  { name: "VK", icon: "✓" },
-  { name: "Tumblr", icon: "t" },
-  { name: "PeerTube", icon: "▶" },
-  { name: "SoundCloud", icon: "☁" },
 ];
 
 function formatDuration(sec?: number): string {
@@ -168,7 +156,7 @@ export default function SocialMediaVideoDownloader() {
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Paste any public video link (YouTube, Instagram, X, Facebook…)"
+            placeholder="Paste a YouTube link (youtube.com/watch… or youtu.be/…)"
             className="w-full flex-1 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none transition-colors focus:border-accent-500 focus:ring-2 focus:ring-accent-200"
           />
           <button
@@ -181,9 +169,8 @@ export default function SocialMediaVideoDownloader() {
           </button>
         </div>
         <p className="mt-3 text-xs text-gray-500">
-          Paste a public video link to download it. Works for YouTube and most
-          social platforms. Instagram may show a notice when it&rsquo;s
-          temporarily refusing the download server.
+          Paste a public YouTube video link to download it as a mobile-friendly
+          MP4. A brief ad watch is required before each download.
         </p>
       </div>
 

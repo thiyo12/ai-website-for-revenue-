@@ -4,7 +4,6 @@ import { existsSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { RateLimiter, getClientIp } from "../lib/rate";
-import { getMediaSession } from "../lib/mediaSession";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,49 +37,12 @@ interface ExtractResult {
 }
 
 const ALLOWED_HOSTS: { match: RegExp; platform: string }[] = [
-  // YouTube
+  // YouTube only
   { match: /^(www\.|m\.|music\.)?youtube\.com$/i, platform: "youtube" },
   { match: /^youtu\.be$/i, platform: "youtube" },
-  // Facebook
-  { match: /^(www\.|m\.)?facebook\.com$/i, platform: "facebook" },
-  { match: /^(www\.|m\.)?fb\.watch$/i, platform: "facebook" },
-  // Instagram
-  { match: /^(www\.|m\.|instagram\.)?instagram\.com$/i, platform: "instagram" },
-  // Pinterest
-  { match: /^(www\.)?pin\.it$/i, platform: "pinterest" },
-  { match: /^(www\.|[\w-]+\.)?pinterest\.(com|co\.uk|de|fr|it|es|nl|se|ch|co\.in|br|au|at|cl|jp|ru|ie|ca|mx|nz|pt|ph)$/i, platform: "pinterest" },
-  // Twitter / X
-  { match: /^(www\.|mobile\.)?twitter\.com$/i, platform: "twitter" },
-  { match: /^(www\.|platform\.)?x\.com$/i, platform: "twitter" },
-  // Reddit
-  { match: /^(www\.|old\.|m\.)?reddit\.com$/i, platform: "reddit" },
-  { match: /^v\.redd\.it$/i, platform: "reddit" },
-  // Snapchat (public Spotlight / discover)
-  { match: /^(www\.)?snapchat\.com$/i, platform: "snapchat" },
-  // TikTok-alternative short video
-  { match: /^(www\.)?vk\.com$/i, platform: "vk" },
-  { match: /^(www\.|m\.)?tumblr\.com$/i, platform: "tumblr" },
-  { match: /^(www\.)?peertube\.(tv|org|fr)$/i, platform: "peertube" },
-  // Dailymotion
-  { match: /^(www\.)?dailymotion\.com$/i, platform: "dailymotion" },
-  // Twitch clips / VODs
-  { match: /^(www\.|clips\.|go\.)?twitch\.tv$/i, platform: "twitch" },
-  // SoundCloud (audio)
-  { match: /^(www\.|m\.)?soundcloud\.com$/i, platform: "soundcloud" },
 ];
 
-interface LimitedPlatform {
-  label: string;
-  reason: string;
-}
-
-const LIMITED_PLATFORMS: Record<string, LimitedPlatform> = {
-  instagram: {
-    label: "Instagram",
-    reason:
-      "Instagram is refusing to serve this public video to the download server right now. It normally works from a regular home connection — try again later.",
-  },
-};
+const LIMITED_PLATFORMS: Record<string, { label: string; reason: string }> = {};
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 6;
@@ -285,19 +247,6 @@ function runExtract(
 
 const PLATFORM_FALLBACKS: Record<string, string> = {
   youtube: "This YouTube video could not be extracted. It may be private, removed, or restricted.",
-  instagram:
-    "This Instagram post couldn't be extracted. Instagram is refusing to serve the video to the download server right now — make sure it's a public post and try again later.",
-  facebook: "This Facebook video could not be extracted. It may be private, removed, or restricted.",
-  twitter: "This Twitter/X video could not be extracted. It may be protected, removed, or restricted.",
-  reddit: "This Reddit video could not be extracted. It may be removed, NSFW, or restricted.",
-  pinterest: "This Pinterest video could not be extracted. It may be private or restricted.",
-  snapchat: "This Snapchat video could not be extracted. It may be private or temporary.",
-  vk: "This VK video could not be extracted. It may be private or restricted.",
-  tumblr: "This Tumblr video could not be extracted. It may be private or restricted.",
-  peertube: "This PeerTube video could not be extracted. It may be restricted.",
-  dailymotion: "This Dailymotion video could not be extracted. It may be unavailable or restricted.",
-  twitch: "This Twitch clip could not be extracted. It may be expired or restricted.",
-  soundcloud: "This audio could not be extracted. It may be unavailable or restricted.",
 };
 
 function mapExtractError(platform: string): string {
@@ -351,28 +300,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   }
   const cert = resolveCertifi();
 
-  // Use the cookies files bundled into the image (or a mounted volume when
-  // COOKIES_DIR is set on the server). They live in the container at runtime.
+  // Use the YouTube cookies (bundled in the image, or a mounted volume when
+  // COOKIES_DIR is set) to get past YouTube's datacenter-IP bot detection.
   const cookieDir = process.env.COOKIES_DIR || path.join(process.cwd(), ".cookies");
   const youtubeCookies = path.join(cookieDir, "youtube.txt");
-  const instagramCookies = path.join(cookieDir, "instagram.txt");
 
-  let opts: { cookies: string | null; proxy: string | null } = { cookies: null, proxy: null };
-  if (hostEntry.platform === "youtube" && existsSync(youtubeCookies)) {
+  const opts: { cookies: string | null; proxy: string | null } = { cookies: null, proxy: null };
+  if (existsSync(youtubeCookies)) {
     opts.cookies = youtubeCookies;
-  }
-  if (hostEntry.platform === "instagram") {
-    if (existsSync(instagramCookies)) {
-      opts.cookies = instagramCookies;
-    } else {
-      try {
-        const session = await getMediaSession();
-        opts.cookies = opts.cookies ?? session.instagramCookieJar;
-        opts.proxy = session.proxy;
-      } catch {
-        // If the session harvester fails (e.g. browser not available), fall back to no cookies.
-      }
-    }
   }
 
   const result = await runExtract(parsed.href, binary, cert, opts, hostEntry.platform);
