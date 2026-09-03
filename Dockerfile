@@ -36,7 +36,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 # Runtime deps: python3, ffmpeg, curl (yt-dlp download), openssl (prisma), ca certs
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -54,10 +53,6 @@ COPY --from=builder /app/.next/standalone ./
 # standalone root so server.js can serve CSS/JS (otherwise the UI loads unstyled)
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-
-# Install the Playwright headless browser (used for warm IG sessions)
-RUN npx playwright install chromium-headless-shell \
-    && npx playwright install-deps chromium-headless-shell || true
 
 USER node
 EXPOSE 3000
