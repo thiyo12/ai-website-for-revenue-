@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import AdGate from "@/components/AdGate";
 
 interface ExtractData {
   platform?: string;
@@ -64,6 +65,16 @@ function proxyHref(downloadUrl: string, audioUrl?: string | null, title?: string
   return `/api/download/merged?${q.toString()}`;
 }
 
+// Start a real browser download by pointing a temporary anchor at the proxied URL.
+function triggerDownload(href: string) {
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = "";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
 export default function SocialMediaVideoDownloader() {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -118,6 +129,11 @@ export default function SocialMediaVideoDownloader() {
   const platformLabel = data?.platform
     ? ERROR_MESSAGES[data.platform] ?? data.platform
     : "";
+
+  const videoHref = data?.downloadUrl
+    ? proxyHref(data.downloadUrl, data.audioUrl, data.title, data.videoOnly)
+    : null;
+  const audioHref = data?.audioUrl ? proxyHref(data.audioUrl) : null;
 
   return (
     <div className="w-full">
@@ -218,29 +234,29 @@ export default function SocialMediaVideoDownloader() {
             </div>
 
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-              {data.downloadUrl && (
-                <a
-                  href={proxyHref(data.downloadUrl, data.audioUrl, data.title, data.videoOnly)}
-                  download
+              {videoHref && (
+                <AdGate
+                  onAction={() => triggerDownload(videoHref)}
+                  buttonLabel="Download Video"
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-700"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   Download Video
-                </a>
+                </AdGate>
               )}
-              {data.audioUrl && (
-                <a
-                  href={proxyHref(data.audioUrl as string)}
-                  download
+              {audioHref && (
+                <AdGate
+                  onAction={() => triggerDownload(audioHref)}
+                  buttonLabel="Download MP3"
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
                   </svg>
                   Download MP3
-                </a>
+                </AdGate>
               )}
             </div>
 
