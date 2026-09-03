@@ -53,8 +53,18 @@ function formatDuration(sec?: number): string {
 
 // Route downloads through the server so the browser receives the file as an
 // attachment (real download) instead of opening the remote media in a new tab.
-function proxyHref(downloadUrl: string): string {
-  return `/api/download?url=${encodeURIComponent(downloadUrl)}`;
+function proxyHref(downloadUrl: string, audioUrl?: string | null, title?: string, videoOnly?: boolean): string {
+  const q = new URLSearchParams({ url: downloadUrl });
+  // When the source is delivered as separate video + audio streams (common for
+  // Instagram reels), have the server merge them into one mobile-playable MP4
+  // so the download plays on phones instead of a silent/incompatible file.
+  if (videoOnly && audioUrl) {
+    q.set("audio", audioUrl);
+    if (title) q.set("title", title);
+    return `/api/download/merged?${q.toString()}`;
+  }
+  if (title) q.set("title", title);
+  return `/api/download?${q.toString()}`;
 }
 
 export default function SocialMediaVideoDownloader() {
@@ -213,7 +223,7 @@ export default function SocialMediaVideoDownloader() {
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               {data.downloadUrl && (
                 <a
-                  href={proxyHref(data.downloadUrl)}
+                  href={proxyHref(data.downloadUrl, data.audioUrl, data.title, data.videoOnly)}
                   download
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-700"
                 >
@@ -225,7 +235,7 @@ export default function SocialMediaVideoDownloader() {
               )}
               {data.audioUrl && (
                 <a
-                  href={proxyHref(data.audioUrl)}
+                  href={proxyHref(data.audioUrl as string)}
                   download
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
                 >
@@ -240,7 +250,7 @@ export default function SocialMediaVideoDownloader() {
             {data.downloadUrl && (
               <button
                 type="button"
-                onClick={() => copyLink(proxyHref(data.downloadUrl as string))}
+                onClick={() => copyLink(proxyHref(data.downloadUrl as string, data.audioUrl, data.title, data.videoOnly))}
                 className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-600 transition-colors hover:text-accent-700"
               >
                 {copied ? (

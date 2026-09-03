@@ -177,7 +177,8 @@ function runExtract(
   url: string,
   binary: string,
   cert: string | null,
-  opts: ExtractOptions = {}
+  opts: ExtractOptions = {},
+  platform?: string
 ): Promise<ExtractResult> {
   return new Promise((resolve) => {
     const args = [
@@ -190,6 +191,12 @@ function runExtract(
       "15",
       "--dump-single-json",
     ];
+    // YouTube deploys aggressive bot-detection on datacenter IPs. Some public
+    // videos only resolve via alternative player clients (tv/android) without
+    // cookies; try them when no cookies file is configured.
+    if (platform === "youtube" && !opts.cookies) {
+      args.push("--extractor-args", "youtube:player_client=tv,android,ios");
+    }
     if (opts.cookies) args.push("--cookies", opts.cookies);
     if (opts.proxy) args.push("--proxy", opts.proxy);
     args.push(url);
@@ -345,18 +352,24 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const cert = resolveCertifi();
 
   let opts: { cookies: string | null; proxy: string | null } = { cookies: null, proxy: null };
+  if (hostEntry.platform === "youtube" || hostEntry.platform === "instagram") {
+    const cookiePath =
+      hostEntry.platform === "youtube"
+        ? process.env.YOUTUBE_COOKIES_FILE
+        : undefined;
+    if (cookiePath && existsSync(cookiePath)) opts.cookies = cookiePath;
+  }
   if (hostEntry.platform === "instagram") {
     try {
       const session = await getMediaSession();
-      opts.cookies = session.instagramCookieJar;
+      opts.cookies = opts.cookies ?? session.instagramCookieJar;
       opts.proxy = session.proxy;
     } catch {
       // If the session harvester fails (e.g. browser not available), fall back to no cookies.
-      opts = { cookies: null, proxy: null };
     }
   }
 
-  const result = await runExtract(parsed.href, binary, cert, opts);
+  const result = await runExtract(parsed.href, binary, cert, opts, hostEntry.platform);
   if (result.error || result.status || !result.data) {
     const limited = LIMITED_PLATFORMS[hostEntry.platform];
     const friendly = mapExtractError(hostEntry.platform);
