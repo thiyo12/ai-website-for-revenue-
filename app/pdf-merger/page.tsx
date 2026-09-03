@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import PdfMerger from "./PdfMerger";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/pdf-merger"),
   title: "Free PDF Merger Online - Combine PDF Files",
   description:
     "Merge multiple PDF files into one document online for free. Drag and drop to combine PDFs in seconds. 100% private — files never leave your browser.",

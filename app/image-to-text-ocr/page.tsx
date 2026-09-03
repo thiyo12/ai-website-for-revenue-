@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import ImageToTextOcr from "./ImageToTextOcr";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/image-to-text-ocr"),
   title: "Free Image to Text (OCR) Converter Online - Extract Text from Images",
   description:
     "Extract text from images and scanned documents with our free online OCR tool. Copy or download the recognized text. 100% in your browser, no uploads.",

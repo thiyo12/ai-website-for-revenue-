@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import RandomNamePicker from "./RandomNamePicker";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/random-name-picker"),
   title: "Random Name Picker - Spin a Random Winner",
   description:
     "Pick a random winner or name online for free. Enter a list of names, spin the wheel, and remove each winner. Great for giveaways and classrooms.",

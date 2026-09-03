@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import SignatureGenerator from "./SignatureGenerator";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/signature-generator"),
   title: "Signature Generator - Create & Download SVG/PNG Signature",
   description:
     "Draw or type an electronic signature online for free. Choose a handwriting font, color and size, then download as a transparent PNG. 100% private.",

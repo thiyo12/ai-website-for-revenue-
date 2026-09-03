@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import ColorPaletteGenerator from "./ColorPaletteGenerator";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/color-palette-generator"),
   title: "Free Color Palette Generator - Create Color Schemes",
   description:
     "Generate beautiful color palettes online for free. Create harmonious color schemes with one click and copy hex codes instantly. Runs in your browser.",

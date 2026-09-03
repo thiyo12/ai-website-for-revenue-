@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import SocialMediaVideoDownloader from "./SocialMediaVideoDownloader";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/social-media-video-downloader"),
   title: "Free YouTube Video Downloader - Save YouTube MP4 Online",
   description:
     "Download any public YouTube video online for free. Paste a YouTube link, get a mobile-friendly MP4 download instantly after a short ad. No sign-up, no watermark.",

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import TextToHandwriting from "./TextToHandwriting";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/text-to-handwriting"),
   title: "Text to Handwriting - Convert Text to Handwritten Note",
   description:
     "Turn typed text into a realistic handwritten-style note online for free. Choose a handwriting font, paper style and ink color, then download as PNG or PDF.",

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import SocialMediaVideoCompressor from "./SocialMediaVideoCompressor";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/social-media-video-compressor"),
   title: "Free Social Media Video Compressor - Compress Videos Online",
   description:
     "Compress videos for Instagram, Facebook, TikTok, YouTube and more. Reduce video file size without losing quality. Runs in your browser. 100% private.",

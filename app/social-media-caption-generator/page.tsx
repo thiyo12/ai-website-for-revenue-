@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import CaptionGenerator from "./CaptionGenerator";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/social-media-caption-generator"),
   title: "Free Social Media Caption Generator - Captions & Hashtags",
   description:
     "Generate catchy social media captions and ready-to-use hashtags for Instagram, TikTok, Facebook, and more. Free, unlimited, and runs in your browser.",

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import FakeTweet from "./FakeTweet";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/fake-tweet-generator"),
   title: "Fake Tweet Generator - Create Mock Tweets",
   description:
     "Create a realistic-looking tweet mockup online for free. Add name, handle, avatar, text, likes and retweets, then download as a PNG. For entertainment only.",

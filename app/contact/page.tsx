@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/contact"),
   title: "Contact Us",
   description:
     "Get in touch with the QuicTools team. Send feedback, report a bug, or suggest a new free online tool.",

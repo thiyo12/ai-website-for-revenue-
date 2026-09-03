@@ -5,7 +5,6 @@ import Footer from "@/components/Footer";
 import AdSlot from "@/components/AdSlot";
 import { GSC_VERIFICATION, BING_VERIFICATION, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import { ENV } from "@/lib/env";
-import Hreflang from "@/components/Hreflang";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -152,7 +151,6 @@ gtag('config', 'G-9TN9YGWPW2');`,
         />
       </head>
       <body className="flex min-h-screen flex-col">
-        <Hreflang />
         <Header />
 
         {/* Ad slot below the header, present on every page */}

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import BackgroundRemover from "./BackgroundRemover";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/background-remover"),
   title: "Free Background Remover Online - Remove Image Background to PNG",
   description:
     "Remove the background from any image instantly with our free on-device AI background remover. Download a transparent PNG. 100% private, no uploads.",

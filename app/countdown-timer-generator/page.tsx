@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import CountdownTimer from "./CountdownTimer";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/countdown-timer-generator"),
   title: "Countdown Timer Generator - Create & Share Countdowns",
   description:
     "Create a live countdown timer to a future event online for free. Customize the target date, color and message, and share it with a link. Runs in your browser.",

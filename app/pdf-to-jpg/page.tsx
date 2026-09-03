@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import PdfToJpg from "./PdfToJpg";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/pdf-to-jpg"),
   title: "Free PDF to JPG Converter Online - Extract Pages as Images",
   description:
     "Convert PDF pages into high-quality JPG images online for free. Extract every page as a JPG, or choose a page range. 100% in your browser, no uploads.",

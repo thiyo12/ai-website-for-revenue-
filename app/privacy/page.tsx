@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/privacy"),
   title: "Privacy Policy",
   description:
     "QuicTools privacy policy: all tools process data entirely in your browser — files and text never leave your device. Details about advertising cookies included.",

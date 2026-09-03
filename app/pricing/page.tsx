@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/pricing"),
   title: "Pricing - Unlock Unlimited Access",
   description:
     "QuicTools is free to use with a daily limit. Unlock unlimited tool access with a simple one-time purchase. No subscription, no recurring fees.",

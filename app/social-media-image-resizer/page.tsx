@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import SocialMediaImageResizer from "./SocialMediaImageResizer";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/social-media-image-resizer"),
   title: "Free Social Media Image Resizer - Sizes for Every Platform",
   description:
     "Resize images to perfect dimensions for Instagram, Facebook, Twitter, YouTube, TikTok and LinkedIn. Download optimized images instantly. 100% private.",

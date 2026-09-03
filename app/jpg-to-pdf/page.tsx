@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import JpgToPdf from "./JpgToPdf";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/jpg-to-pdf"),
   title: "Free JPG to PDF Converter Online - Combine Images into PDF",
   description:
     "Convert and combine multiple JPG images into a single PDF document online for free. Choose page size and orientation. 100% in your browser, no uploads.",

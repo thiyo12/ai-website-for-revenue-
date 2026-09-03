@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import ImageCompressor from "./ImageCompressor";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/image-compressor"),
   title: "Free Image Compressor Online - Compress JPG & PNG",
   description:
     "Compress JPG and PNG images online for free. Reduce image file size dramatically without visible quality loss. 100% private — files never leave your browser.",

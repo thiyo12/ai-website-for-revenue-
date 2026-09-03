@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import MemeGenerator from "./MemeGenerator";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/meme-generator"),
   title: "Meme Generator - Make Your Own Memes",
   description:
     "Create a meme online for free. Upload your own image or use a built-in template, add top and bottom text, then download as PNG. 100% private.",

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import WordCounter from "./WordCounter";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/word-counter"),
   title: "Free Word Counter Online - Count Words, Characters & Sentences",
   description:
     "Count words, characters, sentences, and paragraphs instantly with our free online word counter. Get estimated reading time as you type. 100% private.",

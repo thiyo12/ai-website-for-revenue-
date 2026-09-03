@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/terms-of-service"),
   title: "Terms of Service",
   description:
     "QuicTools terms of service: entertainment-only mockup tools, no valid proof of purchase, prohibited misuse including reimbursement or refund fraud, and client-side utility tools.",

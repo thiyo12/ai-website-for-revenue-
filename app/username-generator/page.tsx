@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import UsernameGenerator from "./UsernameGenerator";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/username-generator"),
   title: "Free Username Generator - Cool, Unique Usernames",
   description:
     "Generate cool, unique usernames for games, social media, and more. Pick a style, mix in numbers and symbols, and copy the perfect username instantly.",

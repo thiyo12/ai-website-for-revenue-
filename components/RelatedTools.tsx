@@ -39,6 +39,7 @@ const NAMES: Record<string, string> = {
   "/fake-notification-generator": "Fake Notification Generator",
   "/fake-caller-id-generator": "Fake Caller ID",
   "/receipt-generator": "Receipt Generator",
+  "/social-media-video-downloader": "Video Downloader",
 };
 
 const RELATED: Record<string, string[]> = {
@@ -77,6 +78,7 @@ const RELATED: Record<string, string[]> = {
   "/fake-notification-generator": ["/fake-whatsapp-chat", "/fake-tweet-generator", "/fake-caller-id-generator"],
   "/fake-caller-id-generator": ["/fake-notification-generator", "/receipt-generator", "/fake-whatsapp-chat"],
   "/receipt-generator": ["/fake-caller-id-generator", "/invoice-generator", "/fake-whatsapp-chat"],
+  "/social-media-video-downloader": ["/video-to-gif", "/social-media-video-compressor", "/fake-whatsapp-chat"],
 };
 
 export default function RelatedTools() {

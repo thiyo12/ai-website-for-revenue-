@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import TextToSpeech from "./TextToSpeech";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/text-to-speech"),
   title: "Free Text to Speech Online - Read Text Aloud",
   description:
     "Convert text to speech online for free. Listen to any text read aloud with natural voices, adjust rate and pitch, and download audio. No sign-up required.",

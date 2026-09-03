@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import ReceiptGenerator from "./ReceiptGenerator";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/receipt-generator"),
   title: "Receipt Generator - Create Mock Receipts",
   description:
     "Create a realistic-looking thermal-print-style receipt mockup online for free. Add store, items, prices and total, then download as a PNG. For entertainment only.",

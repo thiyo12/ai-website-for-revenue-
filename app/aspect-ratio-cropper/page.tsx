@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import AspectRatioCropper from "./AspectRatioCropper";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/aspect-ratio-cropper"),
   title: "Free Aspect Ratio Cropper - Crop Images to Any Ratio",
   description:
     "Crop images to the perfect aspect ratio online for free — 16:9, 9:16, 1:1, 4:5 and more. Download the cropped result instantly. 100% private.",

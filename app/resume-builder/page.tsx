@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import ResumeBuilder from "./ResumeBuilder";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/resume-builder"),
   title: "Resume Builder - Create & Download PDF Resume",
   description:
     "Build a professional resume online for free. Choose a template, fill in your experience and skills, preview live, then download as PDF. 100% private.",

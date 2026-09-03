@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import CurrencyConverter from "./CurrencyConverter";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/currency-converter"),
   title: "Free Currency Converter Online - Live Exchange Rates",
   description:
     "Convert between world currencies with live, up-to-date exchange rates. USD, EUR, GBP, JPY, INR, LKR and more. Free, fast, and easy to use.",

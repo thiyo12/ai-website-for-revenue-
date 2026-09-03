@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import PasswordGenerator from "./PasswordGenerator";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/password-generator"),
   title: "Free Strong Password Generator - Create Secure Random Passwords",
   description:
     "Generate strong, secure, random passwords instantly with our free password generator. Customize length and character sets. 100% local — nothing is sent to any server.",

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import VideoToGif from "./VideoToGif";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/video-to-gif"),
   title: "Free Video to GIF Converter - Make Animated GIFs Online",
   description:
     "Convert any video to a GIF online for free. Upload a video, set the width and frames-per-second, and download your animated GIF. Runs in your browser.",

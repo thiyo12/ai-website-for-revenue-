@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import AgeCalculator from "./AgeCalculator";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/age-calculator"),
   title: "Free Age Calculator Online - Calculate Exact Age in Years, Months, Days",
   description:
     "Calculate your exact age in years, months, days, hours, and total days lived with our free online age calculator. Instant, accurate, and 100% private.",

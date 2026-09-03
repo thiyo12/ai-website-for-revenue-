@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import WordToPdf from "./WordToPdf";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/word-to-pdf"),
   title: "Free Word to PDF Converter Online - Convert DOCX to PDF",
   description:
     "Convert a Word (.docx) document to PDF online for free. Upload your DOCX and download a clean PDF in seconds. 100% in your browser, no uploads.",

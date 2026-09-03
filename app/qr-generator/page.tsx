@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import QrGenerator from "./QrGenerator";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/qr-generator"),
   title: "Free QR Code Generator Online - Create QR Codes as PNG",
   description:
     "Generate QR codes from any text or URL online for free. Create scannable QR codes instantly and download them as high-quality PNG images.",

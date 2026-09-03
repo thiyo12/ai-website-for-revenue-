@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import FakeNotification from "./FakeNotification";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/fake-notification-generator"),
   title: "Fake Notification Generator - Create Mock Phone Alerts",
   description:
     "Create a realistic-looking phone notification mockup online for free. Add app name, header, body, icon and timestamp, then download as a PNG. For entertainment only.",

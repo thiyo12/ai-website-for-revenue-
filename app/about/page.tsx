@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/about"),
   title: "About Us",
   description:
     "Learn about QuicTools — a collection of free, private, browser-based tools for everyday tasks. No uploads, no accounts, no sign-ups.",

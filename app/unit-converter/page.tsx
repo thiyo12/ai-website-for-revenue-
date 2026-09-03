@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import UnitConverter from "./UnitConverter";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/unit-converter"),
   title: "Free Unit Converter Online - Length, Weight, Temperature & Data",
   description:
     "Convert length, weight, temperature, and data size units instantly with our free online unit converter. Fast, accurate, and 100% private — runs in your browser.",

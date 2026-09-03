@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import FakeCallerId from "./FakeCallerId";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/fake-caller-id-generator"),
   title: "Fake Caller ID Generator - Create Incoming Call Screens",
   description:
     "Create a realistic-looking incoming call screen mockup online for free. Add caller name, phone number, avatar and carrier, then download as a PNG. For entertainment only.",

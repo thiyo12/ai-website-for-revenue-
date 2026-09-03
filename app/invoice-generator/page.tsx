@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import InvoiceGenerator from "./InvoiceGenerator";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/invoice-generator"),
   title: "Invoice Generator - Create & Download PDF Invoice",
   description:
     "Create a professional invoice online for free. Add your business, client, itemized lines and totals, preview live, then download as PDF. 100% private.",

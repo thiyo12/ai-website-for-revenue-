@@ -1,6 +1,12 @@
 import ToolCard from "@/components/ToolCard";
 import GameCard from "@/components/GameCard";
 import AdSlot from "@/components/AdSlot";
+import type { Metadata } from "next";
+import { canonical } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  ...canonical("/"),
+};
 
 const tools = [
   {

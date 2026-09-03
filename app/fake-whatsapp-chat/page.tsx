@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import FakeWhatsappChat from "./FakeWhatsappChat";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/fake-whatsapp-chat"),
   title: "Fake WhatsApp Chat Generator - Create Chat Screenshots",
   description:
     "Create realistic-looking WhatsApp-style chat mockups online for free. Add messages, avatars and colors, then download as a PNG. For entertainment only.",

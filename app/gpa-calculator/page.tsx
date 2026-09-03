@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import ToolLayout from "@/components/ToolLayout";
 import GpaCalculator from "./GpaCalculator";
+import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  ...canonical("/gpa-calculator"),
   title: "Free GPA Calculator Online - Calculate Your Semester & CGPA",
   description:
     "Calculate your GPA from your grades and credit hours with our free online GPA calculator. Supports letter grades, points, weighted credits, and multiple semesters. 100% private.",
