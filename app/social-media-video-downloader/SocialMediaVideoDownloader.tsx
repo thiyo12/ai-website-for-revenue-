@@ -45,6 +45,22 @@ const ERROR_MESSAGES: Record<string, string> = {
   soundcloud: "SoundCloud",
 };
 
+const SUPPORTED_PLATFORMS = [
+  { name: "YouTube", icon: "▶" },
+  { name: "Facebook", icon: "f" },
+  { name: "Instagram", icon: "◎" },
+  { name: "X / Twitter", icon: "𝕏" },
+  { name: "Reddit", icon: "r" },
+  { name: "Pinterest", icon: "p" },
+  { name: "Snapchat", icon: "✦" },
+  { name: "Twitch", icon: "▶" },
+  { name: "Dailymotion", icon: "▶" },
+  { name: "VK", icon: "✓" },
+  { name: "Tumblr", icon: "t" },
+  { name: "PeerTube", icon: "▶" },
+  { name: "SoundCloud", icon: "☁" },
+];
+
 function formatDuration(sec?: number): string {
   if (!sec || sec <= 0) return "";
   const m = Math.floor(sec / 60);
@@ -169,6 +185,25 @@ export default function SocialMediaVideoDownloader() {
           social platforms. Instagram may show a notice when it&rsquo;s
           temporarily refusing the download server.
         </p>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Supported platforms
+        </p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+          {SUPPORTED_PLATFORMS.map((p) => (
+            <div
+              key={p.name}
+              className="flex items-center gap-2 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2"
+            >
+              <span className="flex h-6 w-6 items-center justify-center rounded bg-accent-100 text-xs font-bold text-accent-600">
+                {p.icon}
+              </span>
+              <span className="text-sm font-medium text-gray-700">{p.name}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {error && (
