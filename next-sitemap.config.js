@@ -3,7 +3,13 @@ module.exports = {
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://quictools.cc",
   generateRobotsTxt: false,
   outDir: "public",
-  exclude: ["/opengraph-image", "/twitter-image", "/icon.svg", "/robots.txt"],
+  exclude: [
+    "/opengraph-image",
+    "/twitter-image",
+    "/icon.svg",
+    "/robots.txt",
+    "/restore-access",
+  ],
 
   // Low-priority informational / non-tool pages.
   // Every other top-level route is a tool or game and gets a high priority,
