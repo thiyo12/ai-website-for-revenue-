@@ -31,18 +31,6 @@ interface ExtractResponse {
 
 const ERROR_MESSAGES: Record<string, string> = {
   youtube: "YouTube",
-  facebook: "Facebook",
-  instagram: "Instagram",
-  twitter: "Twitter / X",
-  reddit: "Reddit",
-  pinterest: "Pinterest",
-  snapchat: "Snapchat",
-  vk: "VK",
-  tumblr: "Tumblr",
-  peertube: "PeerTube",
-  dailymotion: "Dailymotion",
-  twitch: "Twitch",
-  soundcloud: "SoundCloud",
 };
 
 const SUPPORTED_PLATFORMS = [
