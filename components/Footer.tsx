@@ -48,7 +48,15 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-gray-100 py-4 text-center text-xs text-gray-400">
-        &copy; {new Date().getFullYear()} QuicTools. All rights reserved.
+        &copy; {new Date().getFullYear()} QuicTools. All rights reserved.{" "}
+        <a
+          href="https://maintainex.lk"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-gray-500 hover:text-accent-600 hover:underline"
+        >
+          Developed by MaintainEx
+        </a>
       </div>
     </footer>
   );
