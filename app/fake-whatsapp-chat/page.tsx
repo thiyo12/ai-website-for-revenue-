@@ -4,6 +4,7 @@ import FakeWhatsappChat from "./FakeWhatsappChat";
 import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: true },
   ...canonical("/fake-whatsapp-chat"),
   title: "Fake WhatsApp Chat Generator - Create Chat Screenshots",
   description:
