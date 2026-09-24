@@ -5,23 +5,31 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/image-compressor"),
-  title: "Free Image Compressor Online - Compress JPG & PNG",
+  title: "Image Compressor - Compress JPG, PNG & WebP Online",
   description:
-    "Compress JPG and PNG images online for free. Reduce image file size dramatically without visible quality loss. 100% private — files never leave your browser.",
+    "Compress JPG, PNG and WebP images in your browser. See the original and compressed file size, then download the optimized image.",
 };
 
-const seoTitle = "Free Online Image Compressor for JPG and PNG";
-const seoText = `Our free image compressor lets you reduce the file size of JPG and PNG images directly in your browser. Whether you are uploading photos to a website, sending images by email, or trying to stay within a file-size limit, this tool makes it effortless.
+const seoTitle = "Image Compressor: how it works, supported files and limits";
+const seoText = `## What this image compressor does
 
-Just select an image from your device and the compressor immediately shrinks it using smart, lossy compression that keeps the quality looking great. You will see the original size, the compressed size, and the percentage saved, so you always know exactly how much you have trimmed.
+QuicTools accepts JPG, PNG and WebP images and creates a smaller copy in your browser. The tool shows the original file size, the compressed size and the percentage saved so you can judge whether the result is useful before downloading it.
 
-The tool runs entirely on your device — your image is never uploaded to any server, which means your private photos and documents stay completely secure. The whole process takes only a second for most files.
+## How to use it
 
-How to use it: click the upload area to choose a JPG or PNG from your computer or phone, wait for the compression to finish, preview the result, and hit the download button to save your optimized image. It is perfect for bloggers, web developers, online sellers, and anyone who wants smaller images fast.`;
+Choose or drag an image into the upload area. Compression starts automatically. When the result is ready, compare the original and compressed previews and download the new file. You can then select another image without creating an account.
+
+## Compression settings
+
+The current compressor targets a file size of about 1 MB and limits the longest image dimension to 1920 pixels. Those settings are useful for websites, email attachments and everyday sharing, but they are not intended to preserve a full-resolution archival original. Keep your source file if you may need maximum detail later.
+
+## Privacy and practical limits
+
+The image data is processed with browser-side JavaScript and a web worker rather than being sent to QuicTools for compression. Very large images can still use significant memory on a phone or older computer, and the amount saved varies with the image format, dimensions and existing compression. Some already-optimized images may only become slightly smaller.`;
 
 export default function ImageCompressorPage() {
   const description =
-    "Compress JPG and PNG images to reduce file size without losing noticeable quality. Runs 100% in your browser.";
+    "Compress JPG, PNG and WebP images and compare the size reduction before downloading.";
 
   return (
     <ToolLayout
