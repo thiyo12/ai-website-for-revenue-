@@ -25,8 +25,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
+
       - name: Build production app
         run: npm run build
         env:
           NEXT_PUBLIC_SITE_URL: https://quictools.cc
           NEXT_PUBLIC_ENABLE_PRO_PAYWALL: "false"
+          DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
