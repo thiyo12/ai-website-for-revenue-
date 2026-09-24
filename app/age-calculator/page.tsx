@@ -5,28 +5,33 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/age-calculator"),
-  title: "Free Age Calculator Online - Calculate Exact Age in Years, Months, Days",
+  title: "Age Calculator - Years, Months, Days & Next Birthday",
   description:
-    "Calculate your exact age in years, months, days, hours, and total days lived with our free online age calculator. Instant, accurate, and 100% private.",
+    "Calculate age in years, months and days, total days and weeks, and days until the next birthday.",
 };
 
-const seoTitle = "Free Online Age Calculator - Find Your Exact Age";
-const seoText = `Our free online age calculator tells you your exact age down to the day. Enter your date of birth and it instantly calculates how many years, months, and days old you are, along with the total number of days you have been alive. It is the perfect tool for birthdays, milestone tracking, retirement planning, and school or work applications that ask for your precise age.
- 
-The calculator works out the exact difference between your birthday and today (or any date you choose), accounting for leap years, so the result is always accurate to the day. You can also use the "date on" field to find out how old you were on a specific past date — useful for verifying age for records, anniversaries, or historical events.
- 
-Everything runs in your browser, so your date of birth is never sent to a server, stored, or shared. There is no sign-up and nothing to install. Type in your date and get an answer in a fraction of a second.
- 
-Whether you are figuring out your age in dog years, checking when your child turns 18, or tracking your own milestones, this age calculator gives you a precise answer every time, on any device.`;
+const seoTitle = "Age Calculator: date calculation details and edge cases";
+const seoText = `## What the age calculator shows
+
+Enter a date of birth to calculate age in years, months and days. The tool also reports approximate total days and weeks and the number of days until the next birthday. You can optionally choose a different target date instead of today.
+
+## How the calculation works
+
+Calendar years and months are handled separately before the remaining day difference is calculated. Total-day values are based on the time difference between the selected dates, so timezone and daylight-saving boundaries can sometimes affect edge cases.
+
+## Useful scenarios
+
+The calculator can help with birthday planning, forms that ask for age on a specific date, or quickly checking the elapsed time between a birth date and another date. It is not intended to determine legal eligibility where an official authority uses its own age-calculation rules.
+
+## Privacy
+
+The selected dates are processed locally in the browser. No server request is required for the age calculation.`;
 
 export default function AgeCalculatorPage() {
-  const description =
-    "Find your exact age in years, months, days, and total days lived. Runs 100% in your browser.";
-
   return (
     <ToolLayout
       title="Age Calculator"
-      description={description}
+      description="Calculate age in years, months and days and check the next birthday."
       seoTitle={seoTitle}
       seoText={seoText}
     >
