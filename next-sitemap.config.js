@@ -10,6 +10,10 @@ module.exports = {
     "/robots.txt",
     "/pricing",
     "/restore-access",
+    "/fake-whatsapp-chat",
+    "/fake-tweet-generator",
+    "/fake-notification-generator",
+    "/fake-caller-id-generator",
     "/tools/*",
   ],
 
