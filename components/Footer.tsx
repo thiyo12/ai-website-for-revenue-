@@ -8,9 +8,10 @@ export default function Footer() {
           <p className="text-base font-semibold text-gray-900">
             Quic<span className="text-accent-600">Tools</span>
           </p>
-          <p className="mt-1 text-sm text-gray-500">
-            Free, private, browser-based tools. Your files never leave your
-            device.
+          <p className="mt-1 max-w-md text-sm text-gray-500">
+            Fast online utilities for everyday tasks. Many tools process data
+            locally in your browser; server-assisted features are identified in
+            our privacy information.
           </p>
           <p className="mt-2 text-sm text-gray-500">
             <a
@@ -40,9 +41,6 @@ export default function Footer() {
           </Link>
           <Link href="/terms-of-service" className="transition-colors hover:text-accent-600">
             Terms of Service
-          </Link>
-          <Link href="/restore-access" className="transition-colors hover:text-accent-600">
-            Restore Access
           </Link>
         </nav>
       </div>
