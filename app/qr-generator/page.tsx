@@ -5,23 +5,31 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/qr-generator"),
-  title: "Free QR Code Generator Online - Create QR Codes as PNG",
+  title: "QR Code Generator - Create a PNG QR Code",
   description:
-    "Generate QR codes from any text or URL online for free. Create scannable QR codes instantly and download them as high-quality PNG images.",
+    "Create a QR code from text or a URL, choose an output size from 128 to 1024 pixels and download it as PNG.",
 };
 
-const seoTitle = "Free Online QR Code Generator - Create Scannable QR Codes";
-const seoText = `Create a QR code in seconds with our free online QR code generator. Simply type any text, URL, or Wi-Fi information and a scannable QR code appears instantly. Pointing a phone camera at the code opens the link or shows the text you entered.
+const seoTitle = "QR Code Generator: create, test and download a scannable code";
+const seoText = `## What you can put in a QR code
 
-QR codes have never been more useful. They connect print advertising to websites, power contactless menus in restaurants, share Wi-Fi passwords, and link product packaging to online stores. With this tool you can generate a fresh code for any purpose in less than a minute.
+The generator accepts text or a URL and turns that value into a QR code. Common uses include website links, event information, short instructions, contact details and any other text that you want a phone camera or QR reader to retrieve quickly.
 
-The generator works completely in your browser, so the text you enter never leaves your device. There is no account, no watermarks, and no waiting. As you type, the QR code updates in real time so you can preview exactly what your customers, readers, or guests will scan.
+## How to use it
 
-Once you are happy with your code, download it as a crisp, high-resolution PNG image ready for posters, business cards, flyers, emails, and websites. Clear the field and generate a new code whenever you like — it is completely free, forever.`;
+Enter the text or URL and the QR preview updates automatically. Choose an output size between 128 and 1024 pixels, then download the code as a PNG image for use in a document, poster, website or other design.
+
+## Reliability tips
+
+Always scan the downloaded code before publishing or printing it. Very long content creates a denser QR pattern, and printing a code too small can make scanning harder. Leave clear space around the code and use strong contrast between the dark modules and the background.
+
+## Privacy
+
+QR generation happens in the browser. The text used to build the code does not need to be sent to QuicTools for generation. Remember that anyone who can scan the finished QR image can read the information encoded inside it, so avoid placing secrets in a QR code that will be publicly visible.`;
 
 export default function QrGeneratorPage() {
   const description =
-    "Turn any text or URL into a scannable QR code and download it as a high-quality PNG. Runs 100% in your browser.";
+    "Turn text or a URL into a QR code, choose the size and download a PNG.";
 
   return (
     <ToolLayout
