@@ -4,6 +4,7 @@ import FakeNotification from "./FakeNotification";
 import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: true },
   ...canonical("/fake-notification-generator"),
   title: "Fake Notification Generator - Create Mock Phone Alerts",
   description:
