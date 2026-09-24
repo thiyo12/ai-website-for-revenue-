@@ -5,28 +5,33 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/unit-converter"),
-  title: "Free Unit Converter Online - Length, Weight, Temperature & Data",
+  title: "Unit Converter - Length, Weight, Temperature & Data",
   description:
-    "Convert length, weight, temperature, and data size units instantly with our free online unit converter. Fast, accurate, and 100% private — runs in your browser.",
+    "Convert common length, weight, temperature and digital storage units directly in your browser.",
 };
 
-const seoTitle = "Free Online Unit Converter - Length, Weight, Temperature & Data";
-const seoText = `Convert between length, weight, temperature, and data size units in an instant with our free online unit converter. Choose a category, pick the unit you are starting from, and the conversion updates live as you type — no buttons to press, no waiting.
+const seoTitle = "Unit Converter: supported categories and calculation notes";
+const seoText = `## Supported conversion categories
 
-Pick from four handy categories. Length covers millimeters to miles, including meters, centimeters, kilometers, inches, feet, and yards. Weight converts grams, kilograms, tons, pounds, ounces, and more. Temperature switches between Celsius, Fahrenheit, and Kelvin with precise formulas. Data size converts bytes, kilobytes, megabytes, gigabytes, and terabytes, perfect for checking file sizes, storage plans, and download limits.
+The current converter covers length, weight, temperature and digital data size. It includes common metric and imperial units such as millimeters, meters, kilometers, inches, feet, miles, grams, kilograms, pounds and stone, plus Celsius, Fahrenheit and Kelvin.
 
-The converter is a hard-working companion for travel, cooking, DIY projects, school work, engineering, fitness, and everyday tech tasks. If a recipe calls for ounces but your scale only reads grams, a road sign shows kilometers but you think in miles, or a download limit is quoted in gigabytes, this tool has the answer in seconds.
+## How to use it
 
-It runs entirely in your browser, so there is nothing to install, no account to create, and no data sent anywhere. Both the "from" and "to" inputs stay in sync, so you can enter a value on either side and watch the other update instantly — even on your phone.`;
+Choose a category, select the source and destination units, and enter a value. The converted result updates immediately. You can also swap the two units when you want to reverse a conversion.
+
+## Data-size convention
+
+Digital storage conversions in this tool use 1024-based steps between bytes, KB, MB, GB and TB. Some storage manufacturers use decimal 1000-based units instead, so displayed values can differ from product packaging that follows the decimal convention.
+
+## Privacy and accuracy
+
+All conversion formulas run locally in the browser. Results are calculated with JavaScript floating-point arithmetic, which is suitable for everyday conversions but should not replace specialist measurement or engineering software where regulated precision is required.`;
 
 export default function UnitConverterPage() {
-  const description =
-    "Convert length, weight, temperature, and data size units instantly with synced input fields. Runs 100% in your browser.";
-
   return (
     <ToolLayout
       title="Unit Converter"
-      description={description}
+      description="Convert common length, weight, temperature and data-size units."
       seoTitle={seoTitle}
       seoText={seoText}
     >
