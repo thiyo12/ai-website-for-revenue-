@@ -5,28 +5,33 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/signature-generator"),
-  title: "Signature Generator - Create & Download SVG/PNG Signature",
+  title: "Signature Generator - Draw or Type a Signature PNG",
   description:
-    "Draw or type an electronic signature online for free. Choose a handwriting font, color and size, then download as a transparent PNG. 100% private.",
+    "Draw a signature on a canvas or create a typed signature style and download it as a PNG image.",
 };
 
-const seoTitle = "Free Online Signature Generator";
-const seoText = `Create your own electronic signature with our free signature generator. You can draw your signature by hand using your mouse, trackpad, or finger on touch devices, or type your name and pick from a selection of handwriting-style fonts to generate a stylized signature automatically.
+const seoTitle = "Signature Generator: drawing, typed styles and appropriate use";
+const seoText = `## Two ways to create a signature image
 
-Adjust the pen color, stroke width, and canvas size to get the look you want. Your signature is drawn as a clean vector-style stroke and exports as a transparent PNG that you can drop straight into documents, PDFs, and emails.
+Use Draw mode to sign directly on the canvas with a mouse, trackpad, stylus or touch input. Use Type mode to render text in one of the available handwriting-style fonts. Color and pen width can be adjusted before downloading.
 
-Everything runs entirely in your browser — your signature never leaves your device, so it stays private and secure.
+## PNG output
 
-How to use it: choose the draw or type tab, create your signature, tweak the color and size, and click the download button to save your transparent PNG.`;
+The signature is downloaded as a PNG generated from the browser canvas. A transparent-background signature image can be useful when placing your own signature into documents or designs that you are authorized to sign.
+
+## Electronic-signature limitations
+
+A signature image by itself does not establish identity, intent, consent or legal validity in every situation. Formal electronic-signature laws and business processes can require authentication, audit trails or approved signing systems. Use the tool only where an image signature is appropriate.
+
+## Privacy
+
+Drawing and rendering take place in the browser canvas. The signature does not need to be uploaded to QuicTools for PNG generation.`;
 
 export default function SignatureGeneratorPage() {
-  const description =
-    "Draw or type an electronic signature, adjust the color and size, and download it as a transparent PNG. Runs in your browser.";
-
   return (
     <ToolLayout
       title="Signature Generator"
-      description={description}
+      description="Draw or type a signature and download the result as a PNG image."
       seoTitle={seoTitle}
       seoText={seoText}
     >

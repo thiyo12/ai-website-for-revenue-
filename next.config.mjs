@@ -1,3 +1,5 @@
+import { legacyToolRedirects } from "./lib/legacyToolRedirects.mjs";
+
 /** @type {import('next').NextConfig} */
 
 const csp = [
@@ -42,6 +44,9 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   output: "standalone",
+  async redirects() {
+    return legacyToolRedirects;
+  },
   async headers() {
     return [
       {

@@ -6,6 +6,9 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/"),
+  title: "Free Online Tools for Images, PDFs, Text & Everyday Tasks",
+  description:
+    "Use practical QuicTools utilities for images, PDFs, text, QR codes, conversions and everyday tasks. No account required for core tools.",
 };
 
 const tools = [
@@ -550,29 +553,28 @@ export default function HomePage() {
     <div className="mx-auto w-full max-w-5xl px-4 py-12">
       <section className="mb-12 text-center">
         <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-          <span className="animate-hero-fade-up inline-block">Free Online</span>{" "}
+          <span className="animate-hero-fade-up inline-block">Useful Online</span>{" "}
           <span className="animate-hero-fade-up inline-block" style={{ animationDelay: "0.12s" }}>
-            Tools That
+            Tools for
           </span>{" "}
           <span
             className="animate-hero-fade-up inline-block text-accent-600"
             style={{ animationDelay: "0.24s" }}
           >
-            Respect Your Privacy
+            Everyday Tasks
           </span>
         </h1>
         <p
           className="animate-hero-fade-up mx-auto mt-4 max-w-2xl text-lg text-gray-600"
           style={{ animationDelay: "0.4s" }}
         >
-          QuicTools offers fast, free, browser-based utilities and games for
-          everyday tasks. No sign-up, no uploads, no servers — everything runs
-          directly in your browser, so your files never leave your device.
+          Compress images, work with PDFs, generate QR codes, convert values,
+          extract text and solve everyday tasks without creating an account.
+          Many tools process data locally in your browser, while features that
+          need online data or server processing are described clearly.
         </p>
       </section>
 
-      {/* Top ad slot after hero */}
-      <AdSlot label="top" className="mb-8" />
 
       <section
         aria-labelledby="tools-heading"
@@ -582,14 +584,13 @@ export default function HomePage() {
           id="tools-heading"
           className="col-span-full mb-2 text-2xl font-bold tracking-tight text-gray-900"
         >
-          Tools
+          Popular Tools
         </h2>
         {tools.map((tool) => (
           <ToolCard key={tool.href} {...tool} />
         ))}
 
-        {/* Inline ad inside the tools grid */}
-        <AdSlot label="inline" className="col-span-full mt-2" />
+        <AdSlot slot="inline" className="col-span-full mt-4" />
       </section>
 
       <section
@@ -600,19 +601,16 @@ export default function HomePage() {
           id="fun-tools-heading"
           className="col-span-full mb-2 text-2xl font-bold tracking-tight text-gray-900"
         >
-          Fun & Mockup Tools
+          Creative & Mockup Tools
         </h2>
         <p className="col-span-full -mt-2 text-sm text-gray-500">
-          Create realistic mockups for entertainment — fake chats, tweets,
-          notifications, caller IDs, and receipts.
+          Optional creative and simulation tools for design, demonstration,
+          and entertainment. Generated mockups are not authentic records or communications.
         </p>
         {funTools.map((tool) => (
           <ToolCard key={tool.href} {...tool} />
         ))}
       </section>
-
-      {/* Inline ad slot between tools and games */}
-      <AdSlot label="middle" className="mt-10" />
 
       <section
         aria-labelledby="games-heading"
@@ -628,12 +626,9 @@ export default function HomePage() {
           <GameCard key={game.href} {...game} />
         ))}
 
-        {/* Inline ad inside the games grid */}
-        <AdSlot label="inline" className="col-span-full mt-2" />
       </section>
 
-      <AdSlot label="bottom" className="mt-10" />
-      <AdSlot label="footer" className="mt-5" />
+      <AdSlot slot="bottom" className="mt-10" />
     </div>
   );
 }

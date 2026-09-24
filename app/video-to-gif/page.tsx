@@ -5,23 +5,31 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/video-to-gif"),
-  title: "Free Video to GIF Converter - Make Animated GIFs Online",
+  title: "Video to GIF - Convert a Video Clip in Your Browser",
   description:
-    "Convert any video to a GIF online for free. Upload a video, set the width and frames-per-second, and download your animated GIF. Runs in your browser.",
+    "Convert a video to GIF with browser-based FFmpeg. Adjust output width and frame rate before downloading.",
 };
 
-const seoTitle = "Free Online Video to GIF Converter";
-const seoText = `Turn any video clip into a shareable animated GIF with our free video to GIF converter. Upload a video file, choose how large and smooth you want the GIF to be, and download your animation in seconds.
- 
-You can adjust the output width to control file size and quality, and set the frames-per-second (FPS) to balance smoothness against file size. Lower widths and FPS values produce smaller GIFs that load quickly, while higher values give crisper, smoother animations.
- 
-This is perfect for creating reaction GIFs from clips, showing product features, adding short animations to blog posts, or making shareable content for social media and messaging apps.
- 
-The conversion happens entirely in your browser using WebAssembly, so your video is never uploaded to any server. Your footage stays private. There is no account, no watermark, and no limit on how many videos you can convert.`;
- 
+const seoTitle = "Video to GIF: control size, frame rate and browser processing";
+const seoText = `## What the converter does
+
+Video to GIF turns a video clip into an animated GIF. It is useful for short demonstrations, reactions, product examples and simple animations that need to work without a video player.
+
+## Output controls
+
+You can adjust the output width from 240 to 960 pixels and the frame rate from 5 to 25 FPS. A larger width and higher frame rate usually create a smoother, sharper animation but also increase file size. Lower settings are better when quick loading matters.
+
+## Browser-based conversion
+
+The conversion uses FFmpeg compiled for the browser. The video is read and processed on the device rather than uploaded to QuicTools for conversion. The FFmpeg runtime itself must load before the first conversion.
+
+## Practical limits
+
+GIF is inefficient for long, high-resolution video. A short clip usually works better and produces a more manageable file. Conversion speed depends heavily on the device, video duration and chosen output settings. If a conversion fails, try a shorter clip, lower width or lower frame rate.`;
+
 export default function VideoToGifPage() {
   const description =
-    "Convert any video to an animated GIF and download it. You control the size and smoothness. Runs 100% in your browser.";
+    "Convert a video clip into GIF and control the output width and frame rate.";
 
   return (
     <ToolLayout

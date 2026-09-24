@@ -4,6 +4,7 @@ import FakeCallerId from "./FakeCallerId";
 import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: true },
   ...canonical("/fake-caller-id-generator"),
   title: "Fake Caller ID Generator - Create Incoming Call Screens",
   description:

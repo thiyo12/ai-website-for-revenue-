@@ -6,7 +6,7 @@ export const SITE_URL = (
 
 export const SITE_NAME = "QuicTools";
 export const SITE_DESCRIPTION =
-  "Free online tools that run 100% in your browser. Compress images, merge PDFs, generate QR codes, count words, convert units, and more.";
+  "Fast, practical online tools for images, PDFs, text, QR codes, calculations and everyday tasks. Many tools process data locally in your browser.";
 
 export const GSC_VERIFICATION = process.env.NEXT_PUBLIC_GSC_VERIFICATION ?? "";
 export const BING_VERIFICATION = process.env.NEXT_PUBLIC_BING_VERIFICATION ?? "";

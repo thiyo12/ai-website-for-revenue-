@@ -5,28 +5,33 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/text-to-speech"),
-  title: "Free Text to Speech Online - Read Text Aloud",
+  title: "Text to Speech - Read Text Aloud in Your Browser",
   description:
-    "Convert text to speech online for free. Listen to any text read aloud with natural voices, adjust rate and pitch, and download audio. No sign-up required.",
+    "Listen to text with your browser's speech voices, adjust rate and pitch, and optionally download a short MP3.",
 };
 
-const seoTitle = "Free Online Text to Speech - Listen & Download Audio";
-const seoText = `Turn any text into natural-sounding speech with our free text to speech tool. Type or paste your text, choose a voice, and listen to it read aloud instantly. You can adjust the speaking rate and pitch to get exactly the sound you want.
- 
-This is perfect for proofreading your writing, hearing how a script sounds before recording, helping students listen to study material, or just giving your eyes a break from the screen. The tool works completely in your browser using your device's built-in voices.
- 
-For downloading an audio file, the tool uses Google's text to speech engine to generate an MP3 you can save to your device and use anywhere — in videos, presentations, podcasts, or personal study notes.
- 
-Everything happens on your device. Your text is never uploaded or stored, so you can safely convert private notes, names, and sensitive content. There is no sign-up and no limits, so you can listen to as much text as you like.`;
- 
-export default function TextToSpeechPage() {
-  const description =
-    "Listen to any text read aloud with adjustable rate and pitch, or download it as an MP3. Runs 100% in your browser.";
+const seoTitle = "Text to Speech: browser voices, controls and MP3 download behavior";
+const seoText = `## Listen with your browser's voices
 
+Enter text, choose an available system/browser voice and adjust speaking rate and pitch. Playback uses the browser Speech Synthesis API, so the available voices and languages depend on the operating system and browser.
+
+## Playback controls
+
+Use the Speak button to start reading the text aloud. Pressing it again while speech is active stops playback. Rate and pitch can be adjusted before speaking to make the result easier to understand or better suited to the content.
+
+## MP3 download behavior
+
+The optional MP3 download uses an external Google text-to-speech endpoint and currently sends only the first 200 characters of the entered text for that download request. This is different from normal browser playback, which uses the browser's speech synthesis capability.
+
+## Privacy and limitations
+
+If privacy is important, use browser playback rather than the external MP3 download option. Voice quality, pronunciation and language support vary by device. The tool is useful for listening and accessibility support, but generated speech should be reviewed before professional publication or pronunciation-sensitive use.`;
+
+export default function TextToSpeechPage() {
   return (
     <ToolLayout
       title="Text to Speech"
-      description={description}
+      description="Listen to text with browser voices and adjust rate and pitch."
       seoTitle={seoTitle}
       seoText={seoText}
     >

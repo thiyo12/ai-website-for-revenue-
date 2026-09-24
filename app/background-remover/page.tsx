@@ -5,23 +5,31 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/background-remover"),
-  title: "Free Background Remover Online - Remove Image Background to PNG",
+  title: "Background Remover - Create a Transparent PNG Online",
   description:
-    "Remove the background from any image instantly with our free on-device AI background remover. Download a transparent PNG. 100% private, no uploads.",
+    "Remove an image background with browser-based AI and download the result as a transparent PNG.",
 };
 
-const seoTitle = "Free Online Background Remover - Transparent PNG in Seconds";
-const seoText = `Remove the background from any photo or image instantly with our free online background remover. Upload an image, hit remove, and get a clean cutout on a transparent background that you can download as a PNG.
- 
-This is perfect for product photos on marketplaces, profile pictures and avatars, marketing graphics, logos, thumbnails, and any design project where you need to separate a subject from its background. The AI does the heavy lifting, so you get professional-looking cutouts without spending hours with complex editing tools.
- 
-The background removal runs entirely in your browser using on-device AI. Your image is never uploaded to a server, which keeps your photos completely private. The first time you use it, a small AI model may be loaded into your browser, after which removal is fast and free, with no sign-up and no watermark.
- 
-For best results, use a clear image with good contrast between the subject and background. Whether you are cleaning up a product shot or making a fun sticker, this background remover gives you a crisp transparent PNG in seconds, on any device.`;
+const seoTitle = "Background Remover: workflow, privacy and best-result tips";
+const seoText = `## What the background remover does
+
+This tool separates the main subject of an image from its background and creates a transparent PNG. It is useful for product photos, profile images, thumbnails, simple design work and other situations where you need a cut-out subject without opening a desktop editor.
+
+## How to use it
+
+Choose an image and wait while the AI model loads and processes the file. The page shows the original image and the result side by side. When the cut-out looks right, download the transparent PNG.
+
+## How processing works
+
+The background-removal model is loaded into the browser from its software distribution source and the selected image is processed on the device. The first run can take longer because the model must be downloaded before processing begins.
+
+## Getting a cleaner result
+
+Clear separation between the subject and background usually produces better edges. Fine hair, transparent objects, motion blur, shadows and very busy backgrounds are more difficult for automatic segmentation. If the result is not clean enough, try a higher-resolution source image with better lighting and contrast.`;
 
 export default function BackgroundRemoverPage() {
   const description =
-    "Remove the background from any image instantly with on-device AI. Download a transparent PNG.";
+    "Remove an image background with on-device AI and download a transparent PNG.";
 
   return (
     <ToolLayout

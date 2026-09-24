@@ -5,28 +5,33 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/word-counter"),
-  title: "Free Word Counter Online - Count Words, Characters & Sentences",
+  title: "Word Counter - Count Words, Characters & Reading Time",
   description:
-    "Count words, characters, sentences, and paragraphs instantly with our free online word counter. Get estimated reading time as you type. 100% private.",
+    "Count words, characters, sentences and paragraphs and estimate reading time directly in your browser.",
 };
 
-const seoTitle = "Free Online Word Counter - Count Words & Reading Time";
-const seoText = `Our free word counter gives you instant, accurate word, character, sentence, and paragraph counts as you type. It is the perfect companion for writers, students, bloggers, and professionals who need to meet word limits or keep their content concise.
+const seoTitle = "Word Counter: what is measured and how reading time is estimated";
+const seoText = `## What this counter measures
 
-Paste or type your text into the box and the counter updates live with every keystroke. You will see the total word count, the number of characters (with and without spaces), the sentence count, and the paragraph count all at once. The tool also estimates how long it takes the average person to read your text, which is incredibly useful when writing blog posts, emails, essays, or social media captions.
+The tool reports words, total characters, characters without spaces, sentences, paragraphs and an estimated reading time. The values update as you type or paste text.
 
-Because everything happens in your browser, your writing stays completely private — nothing you paste is ever sent to a server, uploaded, or stored. There is no sign-up, no login, and no limits on how much text you can check.
+## How the counts work
 
-Whether you are hitting a 500-word college essay, a 150-word meta description, or a 2-minute video script, this word counter helps you reach your word count goals quickly and accurately, on any device.`;
+Words are separated by whitespace. Paragraphs are identified from blocks separated by blank lines, while sentence counting looks for common sentence-ending punctuation. These rules are useful for everyday writing but may not match the exact counting method used by every school, publisher or platform.
+
+## Reading-time estimate
+
+Reading time is estimated from a pace of about 200 words per minute. Real reading speed varies with language, complexity and the reader, so the result should be treated as a planning estimate rather than a guarantee.
+
+## Privacy
+
+The analysis happens locally in the page as you type. The text does not need to be sent to QuicTools for the counting operation.`;
 
 export default function WordCounterPage() {
-  const description =
-    "Count words, characters, sentences, and paragraphs, and get estimated reading time as you type. Runs 100% in your browser.";
-
   return (
     <ToolLayout
       title="Word Counter"
-      description={description}
+      description="Count words, characters, sentences, paragraphs and estimated reading time."
       seoTitle={seoTitle}
       seoText={seoText}
     >

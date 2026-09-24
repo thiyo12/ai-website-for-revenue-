@@ -5,28 +5,33 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/resume-builder"),
-  title: "Resume Builder - Create & Download PDF Resume",
+  title: "Resume Builder - Create and Download a PDF Resume",
   description:
-    "Build a professional resume online for free. Choose a template, fill in your experience and skills, preview live, then download as PDF. 100% private.",
+    "Build a resume with contact details, summary, skills, work experience and education, then export it as PDF.",
 };
 
-const seoTitle = "Free Online Resume Builder";
-const seoText = `Create a clean, professional resume with our free resume builder. Add your contact details, a professional summary, work experience, education, and skills. Choose from a few ready-made templates and a color theme, then preview the result live as you type.
+const seoTitle = "Resume Builder: organize your information and review the PDF";
+const seoText = `## What you can add
 
-Everything is laid out automatically so it looks polished and consistent. When you are happy with your resume, download it as a PDF that is ready to send to employers.
+The resume builder includes contact information, job title, professional summary, skills, work experience and education. You can add multiple experience and education entries and choose an accent color for the preview.
 
-Privacy first: your resume runs entirely in your browser. None of your personal information, work history, or details ever leave your device or get stored on a server.
+## Writing useful content
 
-How to use it: fill in your details in the form, pick a template and color, review the live preview, and click the download button to export your PDF resume.`;
+Keep job descriptions specific and focused on results, responsibilities and relevant skills. A shorter resume with clear evidence is often easier to scan than a document filled with generic claims. Tailor the content to the role instead of using the same wording for every application.
+
+## PDF export
+
+The resume preview is rendered to PDF in the browser. Review the downloaded file before applying, especially page breaks, dates, phone number, email address and links. Automated applicant-tracking systems vary, so no visual resume builder can guarantee how every employer system will parse a PDF.
+
+## Privacy
+
+The resume fields and PDF rendering for this builder are handled in the browser. The tool does not need to send your resume content to QuicTools merely to generate the preview and PDF.`;
 
 export default function ResumeBuilderPage() {
-  const description =
-    "Build a professional resume from your experience and skills with a custom color, preview it live, and download it as a PDF.";
-
   return (
     <ToolLayout
       title="Resume Builder"
-      description={description}
+      description="Build a resume from your experience, skills and education and export it as PDF."
       seoTitle={seoTitle}
       seoText={seoText}
     >

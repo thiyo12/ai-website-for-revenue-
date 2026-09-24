@@ -15,10 +15,10 @@ export default function Header() {
 
         <nav className="flex items-center gap-1 sm:gap-2">
           <Link
-            href="/pricing"
+            href="/about"
             className="rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 transition-colors hover:text-accent-600"
           >
-            Pricing
+            About
           </Link>
           <Link
             href="/games"

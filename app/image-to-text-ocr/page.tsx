@@ -5,23 +5,31 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/image-to-text-ocr"),
-  title: "Free Image to Text (OCR) Converter Online - Extract Text from Images",
+  title: "Image to Text OCR - Extract English Text from Images",
   description:
-    "Extract text from images and scanned documents with our free online OCR tool. Copy or download the recognized text. 100% in your browser, no uploads.",
+    "Read English text from photos, screenshots and scans with browser-based OCR, then copy it or download a TXT file.",
 };
 
-const seoTitle = "Free Online OCR - Extract Text from Images & Scans";
-const seoText = `Extract text from any image with our free online OCR (Optical Character Recognition) tool. Upload a photo, screenshot, or scanned document and the tool reads and recognizes the text so you can copy it, edit it, or download it as a text file.
- 
-OCR is incredibly useful. Turn photos of signs, menus, and business cards into editable text, copy text out of screenshots, digitize handwritten or printed notes, and pull information out of scanned documents that would otherwise have to be retyped by hand.
- 
-The recognition runs in your browser using the on-device OCR engine — your image is never uploaded to a server. The first time you use it, the tool may load a small language model, but after that recognition is fast and completely private. There is no sign-up and no watermark.
- 
-For best results, use clear, well-lit, high-contrast images with straight, readable text. Whether you need to copy a few words or digitize an entire page, this OCR tool gives you accurate, copy-ready text in seconds, on any device.`;
+const seoTitle = "Image to Text OCR: supported content, accuracy and privacy";
+const seoText = `## What OCR is useful for
+
+Optical character recognition turns text inside an image into selectable text. Use this tool for screenshots, photographed documents, printed notes, signs and scanned pages when retyping the content manually would be slow.
+
+## How to use it
+
+Choose an image and let the OCR engine analyse it. Recognized text appears below the preview where you can copy it directly or download it as a plain TXT file. The current recognition language is English.
+
+## Accuracy depends on the source
+
+OCR works best with sharp, straight, high-contrast printed text. Small type, handwriting, decorative fonts, curved pages, glare and low-resolution photos can reduce accuracy. Always review important extracted text before relying on it.
+
+## Processing and privacy
+
+The recognition engine runs in the browser. It may download OCR language/model data required for recognition, but the selected image is processed on the device. Larger or more detailed scans can take longer, especially on phones or lower-powered computers.`;
 
 export default function ImageToTextOcrPage() {
   const description =
-    "Extract text from images and scanned documents using on-device OCR. Copy or download the text. Runs in your browser.";
+    "Extract English text from photos, screenshots and scanned pages, then copy or download the result.";
 
   return (
     <ToolLayout
