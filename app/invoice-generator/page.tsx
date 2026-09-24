@@ -5,30 +5,33 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/invoice-generator"),
-  title: "Invoice Generator - Create & Download PDF Invoice",
+  title: "Invoice Generator - Create and Download a PDF Invoice",
   description:
-    "Create a professional invoice online for free. Add your business, client, itemized lines and totals, preview live, then download as PDF. 100% private.",
+    "Build an invoice with business details, client information, line items, tax and notes, then export it as PDF.",
 };
 
-const seoTitle = "Free Online Invoice Generator";
-const seoText = `Create a clean, professional invoice with our free invoice generator. Add your business name and details, your client's information, and itemized line items with quantities and prices. The tool calculates the subtotal, tax, and grand total automatically.
+const seoTitle = "Invoice Generator: what it includes and what to review before sending";
+const seoText = `## What the invoice builder includes
 
-You can upload your business logo, set an invoice number, issue date, and due date, add payment terms and notes, and pick a currency symbol. A live preview updates as you type, so you always see exactly what the final invoice will look like.
+Add your business details, client information, invoice number, issue and due dates, line items, quantities, rates, tax and notes. You can also add a logo and preview the finished document before exporting it.
 
-When you are happy, download the invoice as a PDF that you can email directly to your client.
+## How totals are calculated
 
-Everything runs entirely in your browser — your business and client data never leaves your device, so it stays private and secure.
+The subtotal is calculated from each line-item quantity multiplied by its rate. The selected tax percentage is then applied to the subtotal to produce the total shown in the invoice preview. Review all values before sending the document to a customer.
 
-How to use it: fill in your details, add line items, review the preview, and click the download button to export your PDF invoice.`;
+## PDF export
+
+The current exporter renders the invoice preview into a PDF in the browser. Complex logos, very long invoices or unusual browser zoom settings can affect the final layout, so open the downloaded PDF and check page breaks, totals and contact information before using it professionally.
+
+## Responsibility and privacy
+
+The invoice generator is a formatting tool, not accounting, tax or legal advice. You are responsible for numbering, taxes, required business information and local invoicing rules. Form data and the PDF-rendering workflow are handled in the browser for this tool.`;
 
 export default function InvoiceGeneratorPage() {
-  const description =
-    "Create a professional invoice with itemized lines, totals and a logo, preview it live, and download it as a PDF.";
-
   return (
     <ToolLayout
       title="Invoice Generator"
-      description={description}
+      description="Create an itemized invoice, calculate totals and export the result as PDF."
       seoTitle={seoTitle}
       seoText={seoText}
     >
