@@ -4,6 +4,7 @@ import FakeTweet from "./FakeTweet";
 import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: true },
   ...canonical("/fake-tweet-generator"),
   title: "Fake Tweet Generator - Create Mock Tweets",
   description:
