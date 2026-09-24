@@ -12,11 +12,12 @@ export default function SoftwareAppLd({ name }: { name: string }) {
     "@type": "WebApplication",
     name: `${name} - ${SITE_NAME}`,
     url,
-    description: `Free online ${name.toLowerCase()} by ${SITE_NAME}. Works 100% in your browser with no sign-up and no uploads.`,
+    description: `A free online ${name.toLowerCase()} utility by ${SITE_NAME}.`,
     operatingSystem: "Any",
     browserRequirements: "Requires JavaScript",
     applicationCategory: "UtilityApplication",
     inLanguage: "en",
+    isAccessibleForFree: true,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
   };
