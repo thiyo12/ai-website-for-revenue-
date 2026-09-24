@@ -5,23 +5,31 @@ import { canonical } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...canonical("/social-media-video-compressor"),
-  title: "Free Social Media Video Compressor - Compress Videos Online",
+  title: "Video Compressor - Reduce Video Size for Social Sharing",
   description:
-    "Compress videos for Instagram, Facebook, TikTok, YouTube and more. Reduce video file size without losing quality. Runs in your browser. 100% private.",
+    "Compress a video in your browser with FFmpeg using platform presets and adjustable quality, then download an MP4 result.",
 };
 
-const seoTitle = "Free Online Social Media Video Compressor";
-const seoText = `Compress your videos so they upload faster and take up less space, with our free social media video compressor. Choose a preset sized for Instagram, Facebook, TikTok, YouTube, or X/Twitter, and the tool re-encodes your video to the ideal resolution and bitrate.
- 
-You can also choose a custom quality level if you want more control over the balance between file size and visual quality. A lower resolution and bitrate produce a smaller file that uploads quickly; a higher setting keeps more detail.
- 
-Everything is processed entirely in your browser using WebAssembly (FFmpeg), so your video never leaves your device. That makes it safe for private or unpublished footage. There is no upload, no account, no watermark, and no limit on how many videos you compress.
- 
-The tool is perfect for content creators, small businesses, and anyone who needs to slim down a video before sharing it on social media or sending it in a message.`;
- 
+const seoTitle = "Video Compressor: presets, quality settings and file-size trade-offs";
+const seoText = `## What this compressor does
+
+The video compressor re-encodes a selected video as MP4 using browser-based FFmpeg. Presets provide practical resolutions for common social platforms, while the quality control lets you trade visual detail for a smaller output file.
+
+## Presets and quality
+
+The interface includes presets for Instagram, Facebook, TikTok, YouTube and X/Twitter. These presets choose a target resolution and compression setting; they do not guarantee acceptance by every platform because platform upload rules can change and can also depend on duration, codec, aspect ratio and account type.
+
+## How to reduce file size further
+
+If the result is still too large, choose a smaller-file quality setting or start with a shorter clip. Resolution, duration, motion and source bitrate all influence the final size. Highly detailed or fast-moving video usually needs more data than a simple static scene.
+
+## Processing and device limits
+
+Compression runs in the browser using FFmpeg, so the video does not need to be uploaded to QuicTools for the compression step. Video encoding is demanding work. Long or very large videos can be slow or may exceed available memory, particularly on mobile devices. If that happens, trim or reduce the source before trying again.`;
+
 export default function SocialMediaVideoCompressorPage() {
   const description =
-    "Compress videos for Instagram, Facebook, TikTok, YouTube and more without losing quality. Runs 100% in your browser.";
+    "Compress a video with platform presets and adjustable quality, then download an MP4.";
 
   return (
     <ToolLayout
