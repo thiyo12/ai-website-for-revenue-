@@ -14,6 +14,7 @@ module.exports = {
     "/fake-tweet-generator",
     "/fake-notification-generator",
     "/fake-caller-id-generator",
+    "/tools/*",
   ],
 
   LOW_PRIORITY: new Set([
