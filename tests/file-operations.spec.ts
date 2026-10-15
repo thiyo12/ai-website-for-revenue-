@@ -100,3 +100,23 @@ test("download APIs reject external proxy targets and private networks", async (
     }
   }
 });
+
+test("image compressor accepts JPG and exports a real image", async ({ page }) => {
+  await page.goto("/image-compressor");
+  const encoded = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 320; canvas.height = 220;
+    const context = canvas.getContext("2d")!;
+    context.fillStyle = "#8b5cf6";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/jpeg", 0.9).split(",")[1];
+  });
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "test-image.jpg", mimeType: "image/jpeg", buffer: Buffer.from(encoded, "base64"),
+  });
+  await expect(page.getByRole("button", { name: "Download compressed image" })).toBeVisible({ timeout: 20_000 });
+  const result = await captureDownload(page, /Download compressed image/);
+  expect(result.bytes.length).toBeGreaterThan(100);
+  expect(result.bytes[0]).toBe(0xff);
+  expect(result.bytes[1]).toBe(0xd8);
+});
