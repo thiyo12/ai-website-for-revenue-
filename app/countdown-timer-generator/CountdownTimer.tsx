@@ -33,17 +33,11 @@ function readFromLocation(): Partial<State> | null {
 
 export default function CountdownTimer() {
   const [name, setName] = useState("Product Launch");
-  const [target, setTarget] = useState(
-    () => {
-      const d = new Date();
-      d.setDate(d.getDate() + 7);
-      const p = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-      return p;
-    }
-  );
+  // Browser-local dates are initialized after mount to avoid server/client hydration mismatch.
+  const [target, setTarget] = useState("");
   const [color, setColor] = useState("#2563eb");
   const [message, setMessage] = useState("It's here! 🎉");
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const renderRef = useRef<HTMLDivElement>(null);
 
@@ -51,11 +45,13 @@ export default function CountdownTimer() {
   useEffect(() => {
     if (loaded) return;
     const fromUrl = readFromLocation();
+    let restored = false;
     if (fromUrl?.target) {
       setName(fromUrl.name || name);
       setTarget(fromUrl.target);
       setColor(fromUrl.color || color);
       setMessage(fromUrl.message || message);
+      restored = true;
     } else {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -63,10 +59,17 @@ export default function CountdownTimer() {
           const s = JSON.parse(raw) as State;
           if (s.target) {
             setName(s.name); setTarget(s.target); setColor(s.color); setMessage(s.message);
+            restored = true;
           }
         }
       } catch { /* ignore */ }
     }
+    if (!restored) {
+      const date = new Date();
+      date.setDate(date.getDate() + 7);
+      setTarget(new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16));
+    }
+    setNow(Date.now());
     setLoaded(true);
   }, [loaded, name, color, message]);
 
@@ -86,7 +89,7 @@ export default function CountdownTimer() {
 
   const diff = useMemo(() => {
     const t = new Date(target).getTime();
-    return Math.max(0, t - now);
+    return Number.isFinite(t) && now > 0 ? Math.max(0, t - now) : 0;
   }, [target, now]);
 
   const expired = diff <= 0;
@@ -149,7 +152,9 @@ export default function CountdownTimer() {
           className="mx-auto w-full max-w-md rounded-xl bg-white p-6 text-center shadow-sm"
         >
           <p className="text-lg font-bold text-gray-900">{name}</p>
-          {expired ? (
+          {!loaded ? (
+            <p className="mt-4 text-sm text-gray-500">Preparing countdown…</p>
+          ) : expired ? (
             <p className="mt-4 text-2xl font-bold" style={{ color }}>{message}</p>
           ) : (
             <div className="mt-4 flex items-center justify-center gap-2 sm:gap-3">
