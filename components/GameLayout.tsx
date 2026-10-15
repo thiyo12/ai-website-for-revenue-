@@ -1,5 +1,4 @@
 import Link from "next/link";
-import AdSlot from "./AdSlot";
 import GameSeoText from "./GameSeoText";
 import GamesRelated from "./GamesRelated";
 import MuteButton from "./MuteButton";
@@ -19,7 +18,6 @@ export default function GameLayout({
 }) {
   return (
     <article className="mx-auto w-full max-w-3xl px-4 py-8">
-      <AdSlot label="header" className="mb-5" />
 
       <nav aria-label="Breadcrumb" className="mb-4 text-sm">
         <Link href="/" className="text-accent-600 hover:underline">
@@ -43,21 +41,16 @@ export default function GameLayout({
         <p className="max-w-2xl text-base text-gray-600">{description}</p>
       </header>
 
-      <AdSlot label="top" className="mb-8" />
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-8">
         {children}
       </div>
 
-      <AdSlot label="inline" className="mt-8" />
 
       <GameSeoText title={seoTitle} text={seoText} />
 
-      <AdSlot label="middle" className="mt-8" />
 
       <GamesRelated />
-      <AdSlot label="bottom" className="mt-8" />
-      <AdSlot label="footer" className="mt-5" />
     </article>
   );
 }

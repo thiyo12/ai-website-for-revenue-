@@ -4,24 +4,18 @@ import { promises as fs } from "node:fs";
 import { mkdtemp, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { promises as dns } from "node:dns";
 import { PassThrough } from "node:stream";
-import { isPrivateIpAddress, RateLimiter, getClientIp } from "../../lib/rate";
+import { RateLimiter, getClientIp } from "../../lib/rate";
+import { assertAllowedVideoCdnUrl, safeVideoCdnFetch } from "../../lib/video-cdn";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 600;
 
 const limiter = new RateLimiter(20, 60_000);
-const MAX_DOWNLOAD_BYTES = 2 * 1024 * 1024 * 1024;
+const MAX_DOWNLOAD_BYTES = 250 * 1024 * 1024;
+const MAX_COMBINED_BYTES = MAX_DOWNLOAD_BYTES;
 
-async function assertPublicHost(hostname: string): Promise<void> {
-  const addresses = await dns.lookup(hostname, { all: true, verbatim: true });
-  if (!addresses.length) throw new Error("unresolvable");
-  for (const addr of addresses) {
-    if (isPrivateIpAddress(addr.address)) throw new Error("private");
-  }
-}
 
 async function fetchFile(
   target: URL,
@@ -29,8 +23,7 @@ async function fetchFile(
   dest: string,
   signal: AbortSignal
 ): Promise<void> {
-  await assertPublicHost(target.hostname);
-  const res = await fetch(target, { headers, redirect: "follow", signal });
+  const res = await safeVideoCdnFetch(target, headers, signal);
   if (!res.ok && res.status !== 206) {
     throw new Error(`upstream status ${res.status}`);
   }
@@ -38,11 +31,14 @@ async function fetchFile(
   const size = Number(res.headers.get("content-length") ?? 0);
   if (size > MAX_DOWNLOAD_BYTES) throw new Error("too large");
   const file = await fs.open(dest, "w");
+  let received = 0;
   try {
     const buf = new Uint8Array(128 * 1024);
     for await (const chunk of res.body as unknown as AsyncIterable<Uint8Array>) {
       if (signal.aborted) throw new Error("aborted");
       const c = chunk as Uint8Array;
+      received += c.byteLength;
+      if (received > MAX_COMBINED_BYTES) throw new Error("too large");
       for (let i = 0; i < c.length; i += buf.length) {
         const part = c.subarray(i, i + buf.length);
         await file.write(part);
@@ -120,6 +116,7 @@ export async function GET(req: NextRequest): Promise<Response> {
   }
 
   const videoTitle = req.nextUrl.searchParams.get("title")?.trim() ?? "";
+  const audioOnly = req.nextUrl.searchParams.get("audioOnly") === "1";
 
   let video: URL;
   let audio: URL | null = null;
@@ -137,13 +134,21 @@ export async function GET(req: NextRequest): Promise<Response> {
     return new Response("Only http(s) audio targets are supported.", { status: 400 });
   }
 
+  try {
+    await assertAllowedVideoCdnUrl(video);
+    if (audio) await assertAllowedVideoCdnUrl(audio);
+  } catch {
+    return new Response("Unsupported or restricted media source.", { status: 403 });
+  }
+
   const range = req.headers.get("range");
+  if (audioOnly && range) return new Response("Range downloads are not supported for audio conversion.", { status: 400 });
 
   // Range requests come from in-page players that need byte seeking, which a
   // re-encode cannot satisfy, so passthrough the original stream for those.
   if (range) {
     try {
-      await assertPublicHost(video.hostname);
+      await assertAllowedVideoCdnUrl(video);
     } catch {
       return new Response("This link points to a restricted address.", { status: 403 });
     }
@@ -153,7 +158,7 @@ export async function GET(req: NextRequest): Promise<Response> {
       Accept: "*/*",
     };
     upstreamHeaders.Range = range;
-    const upstream = await fetch(video, { headers: upstreamHeaders, redirect: "follow" });
+    const upstream = await safeVideoCdnFetch(video, upstreamHeaders, AbortSignal.timeout(120_000));
     if (!upstream.ok && upstream.status !== 206) {
       return new Response("The source rejected the request.", { status: 502 });
     }
@@ -173,10 +178,10 @@ export async function GET(req: NextRequest): Promise<Response> {
   const dir = await mkdtemp(path.join(os.tmpdir(), "qt-merge-"));
   const videoFile = path.join(dir, "v" + path.extname(video.pathname).slice(0, 8) || ".mp4");
   const audioFile = audio ? path.join(dir, "a" + path.extname(audio.pathname).slice(0, 8) || ".m4a") : null;
-  const output = path.join(dir, "out.mp4");
+  const output = path.join(dir, audioOnly ? "out.mp3" : "out.mp4");
 
   try {
-    await assertPublicHost(video.hostname);
+    await assertAllowedVideoCdnUrl(video);
     const fetchVideo = fetchFile(
       video,
       { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36", Accept: "*/*" },
@@ -185,7 +190,7 @@ export async function GET(req: NextRequest): Promise<Response> {
     );
     let fetchAudio: Promise<void> | null = null;
     if (audio && audioFile) {
-      await assertPublicHost(audio.hostname);
+      await assertAllowedVideoCdnUrl(audio);
       fetchAudio = fetchFile(
         audio,
         { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36", Accept: "*/*" },
@@ -195,7 +200,15 @@ export async function GET(req: NextRequest): Promise<Response> {
     }
     await Promise.all([fetchVideo, fetchAudio].filter((p): p is Promise<void> => !!p));
 
-    const { code, stderr } = await runFfmpegMerge(videoFile, audio ? audioFile : null, output);
+    const { code, stderr } = audioOnly
+      ? await new Promise<{ code: number; stderr: string }>((resolve) => {
+          const proc = spawn("ffmpeg", ["-y", "-i", videoFile, "-vn", "-codec:a", "libmp3lame", "-b:a", "192k", output], { stdio: ["ignore", "ignore", "pipe"] });
+          let stderr = "";
+          proc.stderr.on("data", (d: Buffer) => { if (stderr.length < 64000) stderr += d.toString("utf8"); });
+          proc.on("error", () => resolve({ code: 1, stderr: "ffmpeg unavailable" }));
+          proc.on("close", (code) => resolve({ code: code ?? 1, stderr }));
+        })
+      : await runFfmpegMerge(videoFile, audio ? audioFile : null, output);
     if (code !== 0) {
       console.error("ffmpeg merge failed:", stderr.slice(-500));
       return new Response("The source media could not be combined. Try downloading video and audio separately.", { status: 502 });
@@ -226,9 +239,9 @@ export async function GET(req: NextRequest): Promise<Response> {
     });
 
     const out = new Headers();
-    out.set("Content-Type", "video/mp4");
+    out.set("Content-Type", audioOnly ? "audio/mpeg" : "video/mp4");
     out.set("Content-Length", String(stat.size));
-    out.set("Content-Disposition", `attachment; filename="${sanitizeFilename(videoTitle, "mp4")}"`);
+    out.set("Content-Disposition", `attachment; filename="${sanitizeFilename(videoTitle, audioOnly ? "mp3" : "mp4")}"`);
 
     return new Response(pass as unknown as BodyInit, { status: 200, headers: out });
   } catch (e) {

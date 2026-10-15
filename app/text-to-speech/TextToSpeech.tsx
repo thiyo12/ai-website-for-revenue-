@@ -67,7 +67,9 @@ export default function TextToSpeech() {
         encodeURIComponent(trimmed.slice(0, 200)) +
         "&tl=en&client=tw-ob";
       const res = await fetch(url);
+      if (!res.ok || !res.headers.get("content-type")?.toLowerCase().startsWith("audio/")) throw new Error("External service unavailable");
       const blob = await res.blob();
+      if (blob.size < 100) throw new Error("Empty audio");
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = objectUrl;
@@ -75,7 +77,7 @@ export default function TextToSpeech() {
       a.click();
       URL.revokeObjectURL(objectUrl);
     } catch {
-      setError("Download failed. Please try again.");
+      setError("External MP3 download is unavailable. Browser speech playback may still work.");
     } finally {
       setDownloading(false);
     }
@@ -189,7 +191,7 @@ export default function TextToSpeech() {
             buttonLabel="Download"
             className="flex-1 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
           >
-            {downloading ? "Generating…" : "Download MP3"}
+            {downloading ? "Generating…" : "Download short MP3 (external)"}
           </AdGate>
         </div>
       </div>

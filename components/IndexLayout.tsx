@@ -24,7 +24,6 @@ export default function IndexLayout({
 }) {
   return (
     <article className="mx-auto w-full max-w-3xl px-4 py-8">
-      <AdSlot label="header" className="mb-5" />
 
       <nav aria-label="Breadcrumb" className="mb-4 text-sm">
         <Link href="/" className="text-accent-600 hover:underline">
@@ -50,7 +49,6 @@ export default function IndexLayout({
         ))}
       </header>
 
-      <AdSlot label="top" className="mb-8" />
 
       {/* CTA to the actual tool */}
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -67,7 +65,6 @@ export default function IndexLayout({
         </Link>
       </div>
 
-      <AdSlot label="inline" className="mt-8" />
 
       {/* Body content */}
       <section className="prose mt-10 space-y-8">
@@ -85,7 +82,6 @@ export default function IndexLayout({
         ))}
       </section>
 
-      <AdSlot label="middle" className="mt-10" />
 
       {/* FAQ */}
       {faqs.length > 0 && (
@@ -107,12 +103,11 @@ export default function IndexLayout({
         </section>
       )}
 
-      <AdSlot label="bottom" className="mt-10" />
 
       {/* Related index pages */}
       {children}
 
-      <AdSlot label="footer" className="mt-5" />
+      <AdSlot slot="bottom" className="mt-16" />
     </article>
   );
 }

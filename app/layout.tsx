@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import AdSlot from "@/components/AdSlot";
 import {
   GSC_VERIFICATION,
   BING_VERIFICATION,
@@ -140,7 +139,6 @@ gtag('config', 'G-9TN9YGWPW2');`,
       <body className="flex min-h-screen flex-col">
         <Header />
 
-        <AdSlot slot="header" className="mx-auto mt-4 max-w-5xl px-4" />
 
         <main className="flex-1">{children}</main>
 

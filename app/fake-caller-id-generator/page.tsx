@@ -30,6 +30,7 @@ export default function FakeCallerIdPage() {
       description={description}
       seoTitle={seoTitle}
       seoText={seoText}
+      adsEnabled={false}
     >
       <FakeCallerId />
     </ToolLayout>

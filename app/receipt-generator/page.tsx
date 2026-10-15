@@ -31,6 +31,7 @@ export default function ReceiptGeneratorPage() {
       description={description}
       seoTitle={seoTitle}
       seoText={seoText}
+      adsEnabled={false}
     >
       <ReceiptGenerator />
     </ToolLayout>

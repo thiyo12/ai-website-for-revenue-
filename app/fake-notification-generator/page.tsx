@@ -30,6 +30,7 @@ export default function FakeNotificationPage() {
       description={description}
       seoTitle={seoTitle}
       seoText={seoText}
+      adsEnabled={false}
     >
       <FakeNotification />
     </ToolLayout>

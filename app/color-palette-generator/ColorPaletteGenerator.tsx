@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PaywallModal from "@/components/PaywallModal";
 
 function hslToHex(h: number, s: number, l: number): string {
@@ -29,7 +29,11 @@ function generatePalette(): string[] {
 }
 
 export default function ColorPaletteGenerator() {
-  const [palette, setPalette] = useState<string[]>(() => generatePalette());
+  // Random values must be generated after hydration, not in the SSR initializer.
+  const [palette, setPalette] = useState<string[]>([]);
+  useEffect(() => {
+    setPalette(generatePalette());
+  }, []);
   const [copied, setCopied] = useState<number | null>(null);
 
   const regenerate = () => setPalette(generatePalette());

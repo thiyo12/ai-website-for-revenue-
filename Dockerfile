@@ -1,12 +1,12 @@
 # ============================================================
 # QuicTools — full production image
-# Includes: Node 20 (Next.js), Python3, yt-dlp, ffmpeg, Playwright
+# Includes: Node 22 (Next.js), Python3, yt-dlp, ffmpeg, Playwright
 # Chromium (for warm-session harvesting). Everything the video
 # downloader needs to actually work.
 # ============================================================
 
 # ---- Installer stage: full JS deps ----
-FROM node:20-slim AS installer
+FROM node:22-slim AS installer
 WORKDIR /app
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -19,7 +19,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 # ---- Builder stage: build Next.js ----
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DEBIAN_FRONTEND=noninteractive
@@ -31,7 +31,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # ---- Runner stage: production runtime with full toolchain ----
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
