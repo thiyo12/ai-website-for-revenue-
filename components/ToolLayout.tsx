@@ -40,7 +40,7 @@ export default function ToolLayout({
         {children}
       </div>
 
-      <AdSlot slot="inline" className="mt-8" />
+      <AdSlot slot="inline" className="mt-14" />
 
       <p className="mt-6 text-center text-sm text-gray-500">
         Privacy and processing method depend on the tool.{" "}
