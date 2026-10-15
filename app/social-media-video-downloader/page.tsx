@@ -31,6 +31,7 @@ export default function SocialMediaVideoDownloaderPage() {
       description={description}
       seoTitle={seoTitle}
       seoText={seoText}
+      adsEnabled={false}
     >
       <SocialMediaVideoDownloader />
     </ToolLayout>
