@@ -75,3 +75,31 @@ test("color palette generates five valid colors", async ({ page }) => {
   await page.getByRole("button", { name: "Generate new palette" }).click();
   await expect(colors).toHaveCount(5);
 });
+
+test("unit conversion updates correct field when units change", async ({ page }) => {
+  await page.goto("/unit-converter");
+  const fromUnit = page.locator("#uc-convert-from");
+  const toUnit = page.locator("#uc-convert-to");
+  const values = page.locator('input[type="number"]');
+  await fromUnit.selectOption("m");
+  await toUnit.selectOption("ft");
+  await values.nth(0).fill("2");
+  await toUnit.selectOption("cm");
+  await expect(values.nth(0)).toHaveValue("2");
+  await expect(values.nth(1)).toHaveValue("200");
+
+  await values.nth(1).fill("50");
+  await fromUnit.selectOption("mm");
+  await expect(values.nth(1)).toHaveValue("50");
+  await expect(values.nth(0)).toHaveValue("500");
+});
+
+test("mobile layout does not overflow the viewport on key tools", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of ["/", "/2048", "/word-counter", "/pdf-merger", "/jpg-to-pdf", "/qr-generator"]) {
+    const response = await page.goto(route);
+    expect(response?.status(), route).toBe(200);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow, route + " horizontal overflow in pixels").toBeLessThanOrEqual(2);
+  }
+});
