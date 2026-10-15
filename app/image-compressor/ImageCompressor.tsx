@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import imageCompression from "browser-image-compression";
 import AdGate from "@/components/AdGate";
 import PaywallModal from "@/components/PaywallModal";
@@ -18,9 +18,25 @@ export default function ImageCompressor() {
   const [compressed, setCompressed] = useState<File | null>(null);
   const [compressedSize, setCompressedSize] = useState(0);
   const [preview, setPreview] = useState("");
+  const [compressedPreview, setCompressedPreview] = useState("");
   const [compressing, setCompressing] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Avoid leaking a new blob URL on every React render or file replacement.
+  useEffect(() => {
+    if (!original) { setPreview(""); return; }
+    const url = URL.createObjectURL(original);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [original]);
+
+  useEffect(() => {
+    if (!compressed) { setCompressedPreview(""); return; }
+    const url = URL.createObjectURL(compressed);
+    setCompressedPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [compressed]);
 
   const handleFile = useCallback(async (file: File) => {
     setError("");
@@ -34,7 +50,6 @@ export default function ImageCompressor() {
     setCompressed(null);
     setCompressedSize(0);
 
-    setPreview(URL.createObjectURL(file));
     setCompressing(true);
 
     try {
@@ -140,10 +155,10 @@ export default function ImageCompressor() {
             <p className="mb-2 text-sm font-medium text-gray-700">
               {compressing ? "Compressing…" : "Compressed image"}
             </p>
-            {compressed ? (
+            {compressed && compressedPreview ? (
               <>
                 <img
-                  src={compressed ? URL.createObjectURL(compressed) : ""}
+                  src={compressedPreview}
                   alt="Compressed"
                   loading="lazy"
                   decoding="async"
