@@ -51,3 +51,27 @@ test("privacy and contact pages exist", async ({ page }) => {
     expect(res?.status()).toBe(200);
   }
 });
+
+test("countdown initializes without hydration warnings", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/countdown-timer-generator");
+  await expect(page.locator('input[type="datetime-local"]')).not.toHaveValue("");
+  expect(errors).toEqual([]);
+});
+
+test("2048 starts with tiles and can restart", async ({ page }) => {
+  await page.goto("/2048");
+  const game = page.locator(".game-bg-animated");
+  await expect(game.getByText("2", { exact: true }).first()).toBeVisible();
+  await page.keyboard.press("ArrowLeft");
+  await expect(game).toBeVisible();
+});
+
+test("color palette generates five valid colors", async ({ page }) => {
+  await page.goto("/color-palette-generator");
+  const colors = page.locator('button[title="Click to copy"]');
+  await expect(colors).toHaveCount(5);
+  await page.getByRole("button", { name: "Generate new palette" }).click();
+  await expect(colors).toHaveCount(5);
+});
