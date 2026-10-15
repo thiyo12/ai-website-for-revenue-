@@ -144,7 +144,13 @@ function canMove(board: Board): boolean {
 }
 
 export default function Game2048() {
-  const [board, setBoard] = useState<Board>(initBoard);
+  // Do not randomize during SSR: the browser would hydrate a different board.
+  const [board, setBoard] = useState<Board>(() =>
+    Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(0))
+  );
+  useEffect(() => {
+    setBoard(initBoard());
+  }, []);
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(0);
   const [gameOver, setGameOver] = useState(false);
