@@ -50,10 +50,11 @@ function formatDuration(sec?: number): string {
 // H.264/AAC so the saved MP4 plays everywhere on mobile (old iOS Safari and
 // Android), even when the source ships with an unplayable codec like VP9/HEVC
 // or as separate video+audio streams (common on Instagram reels).
-function proxyHref(downloadUrl: string, audioUrl?: string | null, title?: string, videoOnly?: boolean): string {
+function proxyHref(downloadUrl: string, audioUrl?: string | null, title?: string, videoOnly?: boolean, audioOnly = false): string {
   const q = new URLSearchParams({ url: downloadUrl });
   if (audioUrl && videoOnly) q.set("audio", audioUrl);
   if (title) q.set("title", title);
+  if (audioOnly) q.set("audioOnly", "1");
   return `/api/download/merged?${q.toString()}`;
 }
 
@@ -125,7 +126,7 @@ export default function SocialMediaVideoDownloader() {
   const videoHref = data?.downloadUrl
     ? proxyHref(data.downloadUrl, data.audioUrl, data.title, data.videoOnly)
     : null;
-  const audioHref = data?.audioUrl ? proxyHref(data.audioUrl) : null;
+  const audioHref = data?.audioUrl ? proxyHref(data.audioUrl, null, data.title, false, true) : null;
 
   return (
     <div className="w-full">
@@ -158,7 +159,7 @@ export default function SocialMediaVideoDownloader() {
         </div>
         <p className="mt-3 text-xs text-gray-500">
           Paste a public YouTube video link to download it as a mobile-friendly
-          MP4. A brief ad watch is required before each download.
+          MP4. Only download videos you own or have permission to save.
         </p>
       </div>
 
