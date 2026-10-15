@@ -39,3 +39,14 @@ jobs:
 
       - name: Verify SEO sitemap
         run: node scripts/check-sitemap.mjs
+
+      - name: Install browser for smoke tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Run every tool route and interaction smoke tests
+        run: npx playwright test
+        env:
+          CI: "true"
+          NEXT_PUBLIC_SITE_URL: https://quictools.cc
+          NEXT_PUBLIC_ENABLE_PRO_PAYWALL: "false"
+          DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
