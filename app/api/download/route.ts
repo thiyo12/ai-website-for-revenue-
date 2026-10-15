@@ -1,22 +1,12 @@
 import { NextRequest } from "next/server";
-import { promises as dns } from "node:dns";
-import { isPrivateIpAddress, RateLimiter, getClientIp } from "../lib/rate";
+import { RateLimiter, getClientIp } from "../lib/rate";
+import { assertAllowedVideoCdnUrl, safeVideoCdnFetch } from "../lib/video-cdn";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 600;
 
 const limiter = new RateLimiter(30, 60_000);
-
-async function assertPublicHost(hostname: string): Promise<void> {
-  const addresses = await dns.lookup(hostname, { all: true, verbatim: true });
-  if (!addresses.length) throw new Error("unresolvable");
-  for (const addr of addresses) {
-    if (isPrivateIpAddress(addr.address)) {
-      throw new Error("private");
-    }
-  }
-}
 
 const ALLOWED_EXT = new Set([
   "mp4", "webm", "mov", "m4v", "mkv",
@@ -33,48 +23,7 @@ function fileNameFromUrl(u: URL): string {
   return final;
 }
 
-const MAX_REDIRECTS = 5;
-
-async function safeFetch(
-  target: URL,
-  headers: Record<string, string>,
-  signal: AbortSignal
-): Promise<globalThis.Response> {
-  let current = target;
-  let redirects = 0;
-  let headersForHop = headers;
-  for (;;) {
-    await assertPublicHost(current.hostname);
-    const res = await fetch(current, {
-      headers: headersForHop,
-      redirect: "manual",
-      signal,
-    });
-    if (
-      (res.status === 301 || res.status === 302 || res.status === 303 || res.status === 307 || res.status === 308) &&
-      res.headers.get("location")
-    ) {
-      if (++redirects > MAX_REDIRECTS) {
-        throw new Error("too many redirects");
-      }
-      try {
-        current = new URL(res.headers.get("location")!, current);
-      } catch {
-        throw new Error("bad redirect");
-      }
-      if (current.protocol !== "https:" && current.protocol !== "http:") {
-        throw new Error("non-http redirect");
-      }
-      // Drop Range on redirect to avoid 416 errors; keep UA/Accept.
-      headersForHop = {
-        "User-Agent": headers["User-Agent"],
-        Accept: headers.Accept,
-      };
-      continue;
-    }
-    return res;
-  }
-}
+const MAX_PROXY_BYTES = 250 * 1024 * 1024;
 
 export async function GET(req: NextRequest): Promise<Response> {
   const ip = getClientIp(req);
@@ -94,15 +43,10 @@ export async function GET(req: NextRequest): Promise<Response> {
     return new Response("Invalid link.", { status: 400 });
   }
 
-  if (target.protocol !== "https:" && target.protocol !== "http:") {
-    return new Response("Only http(s) targets are supported.", { status: 400 });
-  }
-  if (target.username || target.password) {
-    return new Response("Links with credentials are not supported.", { status: 400 });
-  }
+
 
   try {
-    await assertPublicHost(target.hostname);
+    await assertAllowedVideoCdnUrl(target);
   } catch {
     return new Response(
       "This link points to a private or restricted address and cannot be fetched.",
@@ -120,7 +64,7 @@ export async function GET(req: NextRequest): Promise<Response> {
 
   let upstream: globalThis.Response;
   try {
-    upstream = await safeFetch(target, upstreamHeaders, AbortSignal.timeout(120_000));
+    upstream = await safeVideoCdnFetch(target, upstreamHeaders, AbortSignal.timeout(120_000));
   } catch {
     return new Response("The source did not respond. Try again in a moment.", { status: 502 });
   }
@@ -128,6 +72,23 @@ export async function GET(req: NextRequest): Promise<Response> {
   if (!upstream.ok && upstream.status !== 206) {
     return new Response("The source rejected the request.", { status: 502 });
   }
+
+  const expectedBytes = Number(upstream.headers.get("content-length") || 0);
+  if (expectedBytes > MAX_PROXY_BYTES) {
+    await upstream.body?.cancel();
+    return new Response("Media is too large for this service.", { status: 413 });
+  }
+  let bytesReceived = 0;
+  const body = upstream.body?.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+      bytesReceived += chunk.byteLength;
+      if (bytesReceived > MAX_PROXY_BYTES) {
+        controller.error(new Error("Media exceeds maximum download size"));
+      } else {
+        controller.enqueue(chunk);
+      }
+    },
+  }));
 
   const out = new Headers();
   out.set("Content-Disposition", `attachment; filename="${fileNameFromUrl(target)}"`);
@@ -139,5 +100,5 @@ export async function GET(req: NextRequest): Promise<Response> {
   const cr = upstream.headers.get("content-range");
   if (cr) out.set("Content-Range", cr);
 
-  return new Response(upstream.body, { status: upstream.status, headers: out });
+  return new Response(body, { status: upstream.status, headers: out });
 }
