@@ -90,3 +90,13 @@ test("Word-to-PDF exports a readable PDF", async ({ page }) => {
   const pdf = await PDFDocument.load(result.bytes);
   expect(pdf.getPageCount()).toBeGreaterThan(0);
 });
+
+test("download APIs reject external proxy targets and private networks", async ({ request }) => {
+  for (const route of ["/api/download", "/api/download/merged"]) {
+    for (const target of ["https://example.com/large.mp4", "http://127.0.0.1:8080/private"]) {
+      const response = await request.get(route + "?url=" + encodeURIComponent(target));
+      expect(response.status(), route + ": " + target).toBeGreaterThanOrEqual(400);
+      expect(response.status(), route + ": " + target).toBeLessThan(500);
+    }
+  }
+});
