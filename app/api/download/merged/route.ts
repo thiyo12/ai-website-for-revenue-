@@ -115,13 +115,6 @@ export async function GET(req: NextRequest): Promise<Response> {
     return new Response("Missing url parameter.", { status: 400 });
   }
 
-  try {
-    await assertAllowedVideoCdnUrl(video);
-    if (audio) await assertAllowedVideoCdnUrl(audio);
-  } catch {
-    return new Response("Unsupported or restricted media source.", { status: 403 });
-  }
-
   const videoTitle = req.nextUrl.searchParams.get("title")?.trim() ?? "";
   const audioOnly = req.nextUrl.searchParams.get("audioOnly") === "1";
 
@@ -139,6 +132,13 @@ export async function GET(req: NextRequest): Promise<Response> {
   }
   if (audio && audio.protocol !== "https:" && audio.protocol !== "http:") {
     return new Response("Only http(s) audio targets are supported.", { status: 400 });
+  }
+
+  try {
+    await assertAllowedVideoCdnUrl(video);
+    if (audio) await assertAllowedVideoCdnUrl(audio);
+  } catch {
+    return new Response("Unsupported or restricted media source.", { status: 403 });
   }
 
   const range = req.headers.get("range");
