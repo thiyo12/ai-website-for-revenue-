@@ -148,7 +148,7 @@ export async function GET(req: NextRequest): Promise<Response> {
   const MAX_RANGE_BYTES = 8 * 1024 * 1024;
   let safeRange: string | null = null;
   if (range) {
-    const match = /^bytes=(\\d+)-(\\d*)$/.exec(range);
+    const match = /^bytes=(\d+)-(\d*)$/.exec(range);
     const start = match ? Number(match[1]) : NaN;
     const end = match && match[2] ? Number(match[2]) : start + MAX_RANGE_BYTES - 1;
     if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) ||
