@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   compatibility:
     name: Next.js 16 compatibility (non-blocking probe)
