@@ -41,6 +41,7 @@ export default function SocialMediaImageResizer() {
       setError("Please choose an image file.");
       return;
     }
+    if (preview) URL.revokeObjectURL(preview);
     const objectUrl = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
@@ -48,7 +49,7 @@ export default function SocialMediaImageResizer() {
       setPreview(objectUrl);
       setResultUrl("");
     };
-    img.onerror = () => setError("Could not load that image.");
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); setError("Could not load that image."); };
     img.src = objectUrl;
   };
 
@@ -57,8 +58,10 @@ export default function SocialMediaImageResizer() {
       setError("Upload an image first.");
       return;
     }
-    if (!dims.width || !dims.height) {
-      setError("Enter a valid width and height.");
+    if (!Number.isInteger(dims.width) || !Number.isInteger(dims.height) ||
+        dims.width < 1 || dims.height < 1 || dims.width > 4096 || dims.height > 4096 ||
+        dims.width * dims.height > 16_000_000) {
+      setError("Enter a valid width and height (1–4096 pixels, maximum 16 megapixels).");
       return;
     }
     setError("");
@@ -78,10 +81,10 @@ export default function SocialMediaImageResizer() {
       const W = dims.width;
       const H = dims.height;
       const scale = Math.max(W / image.width, H / image.height);
-      const srcW = image.width * scale;
-      const srcH = image.height * scale;
-      const sx = (srcW - W) / 2;
-      const sy = (srcH - H) / 2;
+      const srcW = W / scale;
+      const srcH = H / scale;
+      const sx = (image.width - srcW) / 2;
+      const sy = (image.height - srcH) / 2;
       canvas.width = W;
       canvas.height = H;
       ctx.imageSmoothingQuality = "high";
