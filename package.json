@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "postbuild": "next-sitemap",
     "setup-browser": "playwright install --with-deps chromium-headless-shell",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "qa:live": "node scripts/check-live-readiness.mjs"
   },
   "dependencies": {
     "@ffmpeg/core": "^0.12.10",
