@@ -12,48 +12,38 @@ interface AgeResult {
   nextBirthdayInDays: number;
 }
 
+// Treat date-input values as calendar dates. Clamp month-end birthdays (e.g.
+// January 31 -> February 28) instead of allowing Date to overflow into March.
+function addCalendarMonths(birth: Date, months: number): Date {
+  const first = new Date(Date.UTC(birth.getUTCFullYear(), birth.getUTCMonth() + months, 1));
+  const lastDay = new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth() + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(first.getUTCFullYear(), first.getUTCMonth(), Math.min(birth.getUTCDate(), lastDay)));
+}
+
 function diffToToday(birth: Date, target: Date): AgeResult {
   let years = target.getUTCFullYear() - birth.getUTCFullYear();
-  let months = target.getUTCMonth() - birth.getUTCMonth();
-  let days = target.getUTCDate() - birth.getUTCDate();
+  if (addCalendarMonths(birth, years * 12).getTime() > target.getTime()) years--;
 
-  if (days < 0) {
-    months -= 1;
-    const prevMonthEnd = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth(), 0)).getUTCDate();
-    days += prevMonthEnd;
+  let months = 0;
+  while (months < 11 && addCalendarMonths(birth, years * 12 + months + 1).getTime() <= target.getTime()) {
+    months++;
   }
-  if (months < 0) {
-    years -= 1;
-    months += 12;
-  }
+  const monthsAnchor = addCalendarMonths(birth, years * 12 + months);
+  const days = Math.floor((target.getTime() - monthsAnchor.getTime()) / 86400000);
+  const totalDays = Math.floor((target.getTime() - birth.getTime()) / 86400000);
 
-  const totalDays = Math.floor(
-    (target.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  let nextBirthday = new Date(Date.UTC(
-    target.getUTCFullYear(),
-    birth.getUTCMonth(),
-    birth.getUTCDate()
-  ));
+  const yearOffset = target.getUTCFullYear() - birth.getUTCFullYear();
+  let nextBirthday = addCalendarMonths(birth, yearOffset * 12);
   if (nextBirthday.getTime() < target.getTime()) {
-    nextBirthday = new Date(Date.UTC(
-      target.getUTCFullYear() + 1,
-      birth.getUTCMonth(),
-      birth.getUTCDate()
-    ));
+    nextBirthday = addCalendarMonths(birth, (yearOffset + 1) * 12);
   }
-  const nextBirthdayInDays = Math.floor(
-    (nextBirthday.getTime() - target.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
   return {
     years,
     months,
     days,
     totalDays,
     totalWeeks: Math.floor(totalDays / 7),
-    nextBirthdayInDays,
+    nextBirthdayInDays: Math.floor((nextBirthday.getTime() - target.getTime()) / 86400000),
   };
 }
 
