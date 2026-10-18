@@ -33,6 +33,15 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://quictools.cc
           NEXT_PUBLIC_ENABLE_PRO_PAYWALL: "false"
           DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
+      - name: Install Chromium for upgraded framework tests
+        run: npx playwright install --with-deps chromium
+      - name: Run complete Playwright suite against Next.js 16 candidate
+        run: npx playwright test
+        env:
+          CI: "true"
+          NEXT_PUBLIC_SITE_URL: https://quictools.cc
+          NEXT_PUBLIC_ENABLE_PRO_PAYWALL: "false"
+          DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
       - name: Report remaining production advisories in upgraded dependency graph
         run: node scripts/audit-production.mjs
       - name: Upload the resolved upgrade dependency files
