@@ -12,7 +12,7 @@ const routes = readdirSync(app, { withFileTypes: true })
 test.describe("all public tools and games render", () => {
   for (const route of routes) {
     test(route, async ({ page }) => {
-      const jsErrors = [];
+      const jsErrors: string[] = [];
       page.on("pageerror", (error) => jsErrors.push(error.message));
       const response = await page.goto(route, { waitUntil: "domcontentloaded" });
       expect(response?.status(), route).toBe(200);
