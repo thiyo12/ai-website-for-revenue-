@@ -103,3 +103,37 @@ test("mobile layout does not overflow the viewport on key tools", async ({ page 
     expect(overflow, route + " horizontal overflow in pixels").toBeLessThanOrEqual(2);
   }
 });
+
+test("age calculator handles calendar dates independently of browser time zone", async ({ page }) => {
+  await page.goto("/age-calculator");
+  await page.locator("#age-birth").fill("2000-01-15");
+  await page.locator("#age-target").fill("2026-10-15");
+  await expect(page.getByText("26 years", { exact: true })).toBeVisible();
+  await expect(page.getByText("9 months and 0 days")).toBeVisible();
+  await page.locator("#age-target").fill("1999-12-31");
+  await expect(page.getByText("Please select a valid date of birth.")).toBeVisible();
+});
+
+test("GPA calculator averages weighted courses correctly", async ({ page }) => {
+  await page.goto("/gpa-calculator");
+  await page.getByRole("button", { name: "+ Add course" }).click();
+  const rows = page.locator("tbody tr");
+  await rows.nth(1).locator("select").selectOption("B");
+  await expect(page.getByText("3.50", { exact: true })).toBeVisible();
+  await expect(page.getByText("21.0", { exact: true })).toBeVisible();
+});
+
+test("currency converter calculates both directions from mocked rate data", async ({ page }) => {
+  await page.route("**/api/exchange-rate?*", async route => {
+    const base = new URL(route.request().url()).searchParams.get("base");
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+      base,
+      rates: base === "USD" ? { USD: 1, LKR: 2 } : { LKR: 1, USD: 0.5 }
+    }) });
+  });
+  await page.goto("/currency-converter");
+  await page.locator("#cc-amount").fill("10");
+  await expect(page.getByText(/Rs 20 LKR/)).toBeVisible();
+  await page.getByRole("button", { name: "Swap currencies" }).click();
+  await expect(page.getByText(/\$ 5 USD/)).toBeVisible();
+});
