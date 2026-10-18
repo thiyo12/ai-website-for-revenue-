@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import PaywallModal from "@/components/PaywallModal";
-import AdGate from "@/components/AdGate";
 
 export default function TextToSpeech() {
   const [text, setText] = useState("");
@@ -12,23 +11,29 @@ export default function TextToSpeech() {
   const [pitch, setPitch] = useState(1);
   const [speaking, setSpeaking] = useState(false);
   const [error, setError] = useState("");
-  const [downloading, setDownloading] = useState(false);
+  const [supported, setSupported] = useState(true);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setSupported(false);
       setError("Your browser does not support speech synthesis.");
       return;
     }
     const load = () => setVoices(window.speechSynthesis.getVoices());
     load();
-    window.speechSynthesis.onvoiceschanged = load;
+    window.speechSynthesis.addEventListener("voiceschanged", load);
     return () => {
-      window.speechSynthesis.onvoiceschanged = null;
+      window.speechSynthesis.removeEventListener("voiceschanged", load);
+      window.speechSynthesis.cancel();
     };
   }, []);
 
   const speak = () => {
     const trimmed = text.trim();
+    if (!supported || typeof window === "undefined" || !("speechSynthesis" in window)) {
+      setError("Speech playback is not supported in this browser.");
+      return;
+    }
     if (!trimmed) {
       setError("Enter some text to speak.");
       return;
@@ -48,40 +53,16 @@ export default function TextToSpeech() {
       if (selected) utterance.voice = selected;
     }
     utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
+    utterance.onerror = (event) => {
+      setSpeaking(false);
+      if (event.error !== "canceled" && event.error !== "interrupted") {
+        setError("Your browser could not play this voice. Try another available voice.");
+      }
+    };
     window.speechSynthesis.speak(utterance);
     setSpeaking(true);
   };
 
-  const download = async () => {
-    const trimmed = text.trim();
-    if (!trimmed) {
-      setError("Enter some text to download.");
-      return;
-    }
-    setError("");
-    setDownloading(true);
-    try {
-      const url =
-        "https://translate.google.com/translate_tts?ie=UTF-8&q=" +
-        encodeURIComponent(trimmed.slice(0, 200)) +
-        "&tl=en&client=tw-ob";
-      const res = await fetch(url);
-      if (!res.ok || !res.headers.get("content-type")?.toLowerCase().startsWith("audio/")) throw new Error("External service unavailable");
-      const blob = await res.blob();
-      if (blob.size < 100) throw new Error("Empty audio");
-      const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = objectUrl;
-      a.download = "speech.mp3";
-      a.click();
-      URL.revokeObjectURL(objectUrl);
-    } catch {
-      setError("External MP3 download is unavailable. Browser speech playback may still work.");
-    } finally {
-      setDownloading(false);
-    }
-  };
 
   return (
     <div className="space-y-6">
@@ -173,27 +154,25 @@ export default function TextToSpeech() {
       )}
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
         </p>
       )}
 
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="space-y-3">
         <button
+          type="button"
           onClick={speak}
-          className="flex-1 rounded-lg bg-accent-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-700"
+          disabled={!supported}
+          aria-label={speaking ? "Stop reading text" : "Listen to text"}
+          className="rounded-lg bg-accent-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {speaking ? "Stop" : "Listen"}
         </button>
-        <div className={downloading ? "pointer-events-none opacity-50" : ""}>
-          <AdGate
-            onAction={download}
-            buttonLabel="Download"
-            className="flex-1 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
-          >
-            {downloading ? "Generating…" : "Download short MP3 (external)"}
-          </AdGate>
-        </div>
+        <p className="text-sm text-gray-500">
+          Playback uses the voices installed on your device. MP3 export is not available;
+          no text is sent to an external speech download service.
+        </p>
       </div>
     </div>
   );
