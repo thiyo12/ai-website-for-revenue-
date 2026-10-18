@@ -187,3 +187,28 @@ test("social image resizer actually center-crops source and exports correct dime
   expect(result.filename).toBe("resized-120x120.jpg");
   expect([...result.bytes.subarray(0, 2)]).toEqual([0xff, 0xd8]);
 });
+
+test("invoice generator recalculates tax and exports a valid PDF", async ({ page }) => {
+  await page.goto("/invoice-generator");
+  const invoiceTotal = page.getByText("Total", { exact: true }).locator("..").locator("span").last();
+  await expect(invoiceTotal).toHaveText("$1356.25");
+  await page.getByPlaceholder("Description").fill("Hosting");
+  await page.getByPlaceholder("Rate").fill("10");
+  await page.locator('input[type="number"]').first().fill("2");
+  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(invoiceTotal).toHaveText("$1377.95");
+  const result = await captureDownload(page, /Download PDF/);
+  expect(result.filename).toBe("invoice.pdf");
+  const pdf = await PDFDocument.load(result.bytes);
+  expect(pdf.getPageCount()).toBeGreaterThan(0);
+});
+
+test("resume builder exports the edited preview as a valid PDF", async ({ page }) => {
+  await page.goto("/resume-builder");
+  await page.locator("article input").first().fill("Morgan QA");
+  await expect(page.locator("article h1").last()).toHaveText("Morgan QA");
+  const result = await captureDownload(page, /Download PDF/);
+  expect(result.filename).toBe("resume.pdf");
+  const pdf = await PDFDocument.load(result.bytes);
+  expect(pdf.getPageCount()).toBeGreaterThan(0);
+});
