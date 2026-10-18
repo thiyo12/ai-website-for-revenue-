@@ -5,7 +5,7 @@ import PaywallModal from "@/components/PaywallModal";
 import AdGate from "@/components/AdGate";
 
 const RATIOS: Record<string, string> = {
-  "1:1": "1:1",
+  "1:1": "1/1",
   "4:5": "4/5",
   "3:2": "3/2",
   "2:3": "2/3",
@@ -36,10 +36,12 @@ export default function AspectRatioCropper() {
       setError("Please choose an image file.");
       return;
     }
+    if (preview) URL.revokeObjectURL(preview);
+    const objectUrl = URL.createObjectURL(f);
     const img = new Image();
     img.onload = () => {
       setImage(img);
-      setPreview(URL.createObjectURL(f));
+      setPreview(objectUrl);
       setResultUrl("");
       const maxW = 600;
       const maxH = 500;
@@ -47,8 +49,8 @@ export default function AspectRatioCropper() {
       setDisplayW(img.width * scale);
       setDisplayH(img.height * scale);
     };
-    img.onerror = () => setError("Could not load that image.");
-    img.src = URL.createObjectURL(f);
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); setError("Could not load that image."); };
+    img.src = objectUrl;
   };
 
   const process = () => {
