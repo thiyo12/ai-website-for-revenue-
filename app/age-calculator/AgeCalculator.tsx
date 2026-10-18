@@ -112,10 +112,10 @@ export default function AgeCalculator() {
         <div className="space-y-4">
           <div className="rounded-xl border border-accent-200 bg-accent-50 p-5 text-center">
             <div className="text-4xl font-bold text-accent-700">
-              {result.years} years
+              {result.years} {result.years === 1 ? "year" : "years"}
             </div>
             <div className="mt-1 text-sm text-gray-600">
-              {result.months} months and {result.days} days
+              {result.months} {result.months === 1 ? "month" : "months"} and {result.days} {result.days === 1 ? "day" : "days"}
             </div>
           </div>
           <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
