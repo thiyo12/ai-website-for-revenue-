@@ -48,6 +48,13 @@ await verify("Homepage and metadata", async () => {
   if (!/name=["']description["']/i.test(html)) throw Error("Missing meta description");
   if (!/<h1[\s>]/i.test(html)) throw Error("Missing homepage H1");
 });
+await verify("Trust and legal pages", async () => {
+  for (const route of ["/about", "/contact", "/privacy", "/terms-of-service"]) {
+    const html = await get(route);
+    if (!/<title>[^<]+<\\/title>/i.test(html)) throw Error("Missing title on " + route);
+    if (!/<h1[\\s>]/i.test(html)) throw Error("Missing heading on " + route);
+  }
+});
 await verify("robots.txt sitemap declaration", async () => {
   const txt = await get("/robots.txt");
   if (!txt.includes(origin + "/sitemap.xml")) throw Error("robots.txt does not reference the deployed sitemap");
