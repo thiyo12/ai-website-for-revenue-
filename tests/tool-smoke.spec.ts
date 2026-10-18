@@ -210,3 +210,12 @@ test.describe("all public routes fit a mobile viewport", () => {
     });
   }
 });
+
+test("Sudoku number pad stays usable at 320px viewport width", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/daily-sudoku");
+  await expect(page.getByRole("heading", { name: "Daily Sudoku" }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "9", exact: true }).last()).toBeVisible();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(2);
+});
