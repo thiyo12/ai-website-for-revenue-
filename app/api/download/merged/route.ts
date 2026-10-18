@@ -134,13 +134,6 @@ export async function GET(req: NextRequest): Promise<Response> {
     return new Response("Only http(s) audio targets are supported.", { status: 400 });
   }
 
-  try {
-    await assertAllowedVideoCdnUrl(video);
-    if (audio) await assertAllowedVideoCdnUrl(audio);
-  } catch {
-    return new Response("Unsupported or restricted media source.", { status: 403 });
-  }
-
   const range = req.headers.get("range");
   if (audioOnly && range) return new Response("Range downloads are not supported for audio conversion.", { status: 400 });
 
@@ -156,6 +149,13 @@ export async function GET(req: NextRequest): Promise<Response> {
       return new Response("Unsupported or oversized byte range.", { status: 416 });
     }
     safeRange = `bytes=${start}-${end}`;
+  }
+
+  try {
+    await assertAllowedVideoCdnUrl(video);
+    if (audio) await assertAllowedVideoCdnUrl(audio);
+  } catch {
+    return new Response("Unsupported or restricted media source.", { status: 403 });
   }
 
   // Range requests come from in-page players that need byte seeking, which a
