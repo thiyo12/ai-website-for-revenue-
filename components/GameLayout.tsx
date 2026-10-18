@@ -42,7 +42,7 @@ export default function GameLayout({
       </header>
 
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-8">
+      <div className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm sm:p-8">
         {children}
       </div>
 
