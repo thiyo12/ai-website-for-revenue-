@@ -120,3 +120,11 @@ test("image compressor accepts JPG and exports a real image", async ({ page }) =
   expect(result.bytes[0]).toBe(0xff);
   expect(result.bytes[1]).toBe(0xd8);
 });
+
+test("merged media rejects excessive and malformed byte ranges before proxying", async ({ request }) => {
+  const url = "/api/download/merged?url=" + encodeURIComponent("https://rr1---sn.googlevideo.com/videoplayback");
+  for (const range of ["bytes=0-20000000", "bytes=0-1,3-4", "bytes=100-50"]) {
+    const response = await request.get(url, { headers: { Range: range } });
+    expect(response.status(), range).toBe(416);
+  }
+});
