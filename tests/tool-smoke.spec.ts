@@ -149,7 +149,7 @@ test("random name picker does not reuse the last name until reset", async ({ pag
   await expect(page.getByText("Winner!")).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText("Names remaining in pool: 0")).toBeVisible();
   await expect(page.getByRole("button", { name: /All names picked/ })).toBeDisabled();
-  await page.getByRole("button", { name: "Reset" }).click();
+  await page.getByRole("button", { name: "Reset", exact: true }).click();
   await expect(page.getByRole("button", { name: "Spin", exact: true })).toBeEnabled();
   await expect(page.getByText("Names remaining in pool: 1")).toBeVisible();
 });
