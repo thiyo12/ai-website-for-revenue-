@@ -11,7 +11,10 @@
 **Gate:** Never deploy a failing branch; record a successful build/test run for each candidate SHA.
 
 ## Phase 1 — Security and stability (IN PROGRESS; blocks release)
-- [ ] Run an explicit `npm audit --omit=dev` in CI, record affected production packages, and classify findings as patched / mitigated / not exploitable with evidence.
+- [x] Run `npm audit --omit=dev` in CI. Current branch: 1 critical, 7 high, 1 low production findings (run #59).
+- [x] Smoke-build patched Next.js 16.4.2 + React 19.2 candidate and pass all 75 browser tests in an isolated CI checkout (run #10).
+- [ ] Promote the tested package manifest + generated lockfile from the compatibility probe into a dedicated reviewed migration commit; rerun all tests after promotion.
+- [ ] Triage remaining patched-framework advisories; the initial upgrade candidate reported 1 high (`source-map-js`) and 1 low (`dompurify`).
 - [ ] Fix production critical/high findings, update the lockfile safely, and enforce an audit gate; don't run `npm audit fix --force` blindly.
 - [x] Restrict video-download proxy destinations and redirects to YouTube media CDN, with size limits and negative security tests.
 - [ ] Validate yt-dlp, ffmpeg, file-size ceilings, rate limits, resource exhaustion, DNS rebinding, and proxy header trust in the production environment.
