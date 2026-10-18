@@ -433,7 +433,7 @@ export default function DailySudoku() {
 
   return (
     <div className="flex min-w-0 max-w-full flex-col items-center gap-5 p-0 sm:p-4 mx-auto select-none">
-      <h1 className="text-2xl font-bold text-gray-900">Daily Sudoku</h1>
+      <h2 className="text-2xl font-bold text-gray-900">Daily Sudoku</h2>
 
       <div className="flex gap-2">
         {(["easy", "medium", "hard"] as Difficulty[]).map((d) => (
