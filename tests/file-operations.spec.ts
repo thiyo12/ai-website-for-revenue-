@@ -128,3 +128,61 @@ test("merged media rejects excessive and malformed byte ranges before proxying",
     expect(response.status(), range).toBe(416);
   }
 });
+
+test("aspect-ratio cropper creates a real square JPEG with default 1:1", async ({ page }) => {
+  await page.goto("/aspect-ratio-cropper");
+  const base64 = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 200; canvas.height = 100;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "rgb(30, 120, 210)";
+    ctx.fillRect(0, 0, 200, 100);
+    return canvas.toDataURL("image/png").split(",")[1];
+  });
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "sample.png", mimeType: "image/png", buffer: Buffer.from(base64, "base64")
+  });
+  await page.getByRole("button", { name: "Crop to 1:1" }).click();
+  const image = page.getByRole("img", { name: "Cropped" });
+  await expect(image).toBeVisible();
+  await expect.poll(async () => image.evaluate((el: HTMLImageElement) => [el.naturalWidth, el.naturalHeight])).toEqual([100, 100]);
+  const result = await captureDownload(page, /Download image/);
+  expect(result.filename).toBe("cropped-1x1.jpg");
+  expect([...result.bytes.subarray(0, 2)]).toEqual([0xff, 0xd8]);
+});
+
+test("social image resizer actually center-crops source and exports correct dimensions", async ({ page }) => {
+  await page.goto("/social-media-image-resizer");
+  const base64 = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 200; canvas.height = 100;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#f00000"; ctx.fillRect(0, 0, 100, 100);
+    ctx.fillStyle = "#0000f0"; ctx.fillRect(100, 0, 100, 100);
+    return canvas.toDataURL("image/png").split(",")[1];
+  });
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "two-colors.png", mimeType: "image/png", buffer: Buffer.from(base64, "base64")
+  });
+  await page.getByLabel("Custom size").check();
+  await page.getByPlaceholder("Width").fill("120");
+  await page.getByPlaceholder("Height").fill("120");
+  await page.getByRole("button", { name: "Resize to 120x120" }).click();
+  const image = page.getByRole("img", { name: "Resized" });
+  await expect(image).toBeVisible();
+  const resultPixels = await image.evaluate((el: HTMLImageElement) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = el.naturalWidth; canvas.height = el.naturalHeight;
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(el, 0, 0);
+    return { width: canvas.width, height: canvas.height,
+      left: [...ctx.getImageData(10, 60, 1, 1).data],
+      right: [...ctx.getImageData(110, 60, 1, 1).data] };
+  });
+  expect([resultPixels.width, resultPixels.height]).toEqual([120, 120]);
+  expect(resultPixels.left[0]).toBeGreaterThan(180);
+  expect(resultPixels.right[2]).toBeGreaterThan(180);
+  const result = await captureDownload(page, /Download image/);
+  expect(result.filename).toBe("resized-120x120.jpg");
+  expect([...result.bytes.subarray(0, 2)]).toEqual([0xff, 0xd8]);
+});
