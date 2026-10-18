@@ -20,7 +20,8 @@ jobs:
         run: npm ci
       - name: Stage patched framework upgrade in isolated CI checkout
         run: |
-          npm install --no-save --legacy-peer-deps next@16.4.2 react@19.2.0 react-dom@19.2.0 @types/react@19 @types/react-dom@19 eslint-config-next@16.4.2 eslint@9
+          npm install --save --legacy-peer-deps next@16.4.2 react@19.2.0 react-dom@19.2.0
+          npm install --save-dev --legacy-peer-deps @types/react@19 @types/react-dom@19 eslint-config-next@16.4.2 eslint@9
           node -e "console.log('Next.js:', require('next/package.json').version)"
       - name: Generate Prisma client
         run: npx prisma generate
@@ -34,3 +35,13 @@ jobs:
           DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
       - name: Report remaining production advisories in upgraded dependency graph
         run: node scripts/audit-production.mjs
+      - name: Upload the resolved upgrade dependency files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: next16-upgrade-candidate
+          path: |
+            package.json
+            package-lock.json
+            tsconfig.json
+          retention-days: 7
