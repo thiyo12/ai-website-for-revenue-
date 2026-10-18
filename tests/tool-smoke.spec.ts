@@ -217,5 +217,9 @@ test("Sudoku number pad stays usable at 320px viewport width", async ({ page }) 
   await expect(page.getByRole("heading", { name: "Daily Sudoku" }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "9", exact: true }).last()).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  expect(overflow).toBeLessThanOrEqual(2);
+  const overflowing = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("body *")]
+    .filter(el => el.getBoundingClientRect().right > innerWidth + 2)
+    .slice(0, 12)
+    .map(el => ({ tag: el.tagName, classes: String(el.className).slice(0, 120), right: Math.round(el.getBoundingClientRect().right), width: Math.round(el.getBoundingClientRect().width) })));
+  expect(overflow, JSON.stringify(overflowing)).toBeLessThanOrEqual(2);
 });
