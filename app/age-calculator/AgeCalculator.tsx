@@ -13,13 +13,13 @@ interface AgeResult {
 }
 
 function diffToToday(birth: Date, target: Date): AgeResult {
-  let years = target.getFullYear() - birth.getFullYear();
-  let months = target.getMonth() - birth.getMonth();
-  let days = target.getDate() - birth.getDate();
+  let years = target.getUTCFullYear() - birth.getUTCFullYear();
+  let months = target.getUTCMonth() - birth.getUTCMonth();
+  let days = target.getUTCDate() - birth.getUTCDate();
 
   if (days < 0) {
     months -= 1;
-    const prevMonthEnd = new Date(target.getFullYear(), target.getMonth(), 0).getDate();
+    const prevMonthEnd = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth(), 0)).getUTCDate();
     days += prevMonthEnd;
   }
   if (months < 0) {
@@ -31,17 +31,17 @@ function diffToToday(birth: Date, target: Date): AgeResult {
     (target.getTime() - birth.getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  let nextBirthday = new Date(
-    target.getFullYear(),
-    birth.getMonth(),
-    birth.getDate()
-  );
+  let nextBirthday = new Date(Date.UTC(
+    target.getUTCFullYear(),
+    birth.getUTCMonth(),
+    birth.getUTCDate()
+  ));
   if (nextBirthday.getTime() < target.getTime()) {
-    nextBirthday = new Date(
-      target.getFullYear() + 1,
-      birth.getMonth(),
-      birth.getDate()
-    );
+    nextBirthday = new Date(Date.UTC(
+      target.getUTCFullYear() + 1,
+      birth.getUTCMonth(),
+      birth.getUTCDate()
+    ));
   }
   const nextBirthdayInDays = Math.floor(
     (nextBirthday.getTime() - target.getTime()) / (1000 * 60 * 60 * 24)
@@ -64,10 +64,14 @@ export default function AgeCalculator() {
 
   const result = useMemo<AgeResult | null>(() => {
     if (!birthDate) return null;
-    const birth = new Date(birthDate);
+    // Date input values are calendar dates, not local-time UTC offsets.
+    const birth = new Date(`${birthDate}T00:00:00Z`);
     if (isNaN(birth.getTime())) return null;
-    const target = targetDate ? new Date(targetDate) : new Date();
-    if (isNaN(target.getTime())) return null;
+    const today = new Date();
+    const target = targetDate
+      ? new Date(`${targetDate}T00:00:00Z`)
+      : new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
+    if (isNaN(target.getTime()) || birth.getTime() > target.getTime()) return null;
     return diffToToday(birth, target);
   }, [birthDate, targetDate]);
 
