@@ -166,3 +166,47 @@ test("username generator respects base word and no-numbers setting", async ({ pa
     expect(/[0-9]/.test(name)).toBe(false);
   }
 });
+
+
+test("text to speech honestly offers local playback without external MP3 download", async ({ page }) => {
+  await page.goto("/text-to-speech");
+  await page.locator("#tts-text").fill("Welcome to QuicTools");
+  await expect(page.getByRole("button", { name: "Listen to text" })).toBeVisible();
+  await expect(page.getByText(/MP3 export is not available/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /Download.*MP3/ })).toHaveCount(0);
+});
+
+test("video downloader shows MP3 for a progressive MP4 with an audio track", async ({ page }) => {
+  let videoOnly = false;
+  await page.route("**/api/extract?*", async route => {
+    await route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({
+        platform: "youtube", title: "Authorized test video",
+        downloadUrl: "https://rr1---sn.googlevideo.com/videoplayback",
+        audioUrl: null, videoOnly, format: "mp4 360p",
+      }),
+    });
+  });
+  await page.goto("/social-media-video-downloader");
+  await page.locator("#media-url").fill("https://www.youtube.com/watch?v=testcase");
+  await page.getByRole("button", { name: "Get Video" }).click();
+  await expect(page.getByRole("button", { name: "Download Video" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Download MP3" })).toBeVisible();
+  videoOnly = true;
+  await page.getByRole("button", { name: "Get Video" }).click();
+  await expect(page.getByRole("button", { name: "Download MP3" })).toHaveCount(0);
+});
+
+test.describe("all public routes fit a mobile viewport", () => {
+  for (const route of routes) {
+    test(route, async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      const response = await page.goto(route, { waitUntil: "domcontentloaded" });
+      expect(response?.status(), route).toBe(200);
+      await expect(page.locator("h1").first()).toBeVisible();
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(overflow, route + " overflow px").toBeLessThanOrEqual(2);
+    });
+  }
+});
