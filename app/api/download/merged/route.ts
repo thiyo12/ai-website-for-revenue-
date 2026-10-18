@@ -144,9 +144,23 @@ export async function GET(req: NextRequest): Promise<Response> {
   const range = req.headers.get("range");
   if (audioOnly && range) return new Response("Range downloads are not supported for audio conversion.", { status: 400 });
 
+  // Range passthrough is only for seeking. Never let it bypass download limits.
+  const MAX_RANGE_BYTES = 8 * 1024 * 1024;
+  let safeRange: string | null = null;
+  if (range) {
+    const match = /^bytes=(\\d+)-(\\d*)$/.exec(range);
+    const start = match ? Number(match[1]) : NaN;
+    const end = match && match[2] ? Number(match[2]) : start + MAX_RANGE_BYTES - 1;
+    if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) ||
+        start < 0 || end < start || end - start + 1 > MAX_RANGE_BYTES) {
+      return new Response("Unsupported or oversized byte range.", { status: 416 });
+    }
+    safeRange = `bytes=${start}-${end}`;
+  }
+
   // Range requests come from in-page players that need byte seeking, which a
   // re-encode cannot satisfy, so passthrough the original stream for those.
-  if (range) {
+  if (safeRange) {
     try {
       await assertAllowedVideoCdnUrl(video);
     } catch {
@@ -157,11 +171,25 @@ export async function GET(req: NextRequest): Promise<Response> {
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
       Accept: "*/*",
     };
-    upstreamHeaders.Range = range;
+    upstreamHeaders.Range = safeRange;
     const upstream = await safeVideoCdnFetch(video, upstreamHeaders, AbortSignal.timeout(120_000));
-    if (!upstream.ok && upstream.status !== 206) {
-      return new Response("The source rejected the request.", { status: 502 });
+    if (upstream.status !== 206) {
+      await upstream.body?.cancel();
+      return new Response("The source did not honor the byte range.", { status: 502 });
     }
+    const expectedSize = Number(upstream.headers.get("content-length") || 0);
+    if (expectedSize > MAX_RANGE_BYTES) {
+      await upstream.body?.cancel();
+      return new Response("The source returned an oversized byte range.", { status: 413 });
+    }
+    let total = 0;
+    const bounded = upstream.body?.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk, controller) {
+        total += chunk.byteLength;
+        if (total > MAX_RANGE_BYTES) controller.error(new Error("Range limit exceeded"));
+        else controller.enqueue(chunk);
+      },
+    }));
     const out = new Headers();
     out.set("Content-Disposition", `attachment; filename="${sanitizeFilename(videoTitle, "mp4")}"`);
     out.set("Accept-Ranges", "bytes");
@@ -169,7 +197,9 @@ export async function GET(req: NextRequest): Promise<Response> {
     if (ct) out.set("Content-Type", ct);
     const cl = upstream.headers.get("content-length");
     if (cl) out.set("Content-Length", cl);
-    return new Response(upstream.body, { status: upstream.status, headers: out });
+    const contentRange = upstream.headers.get("content-range");
+    if (contentRange) out.set("Content-Range", contentRange);
+    return new Response(bounded, { status: upstream.status, headers: out });
   }
 
   // Merge/re-encode path: always re-encode to H.264/AAC so the saved MP4 plays
