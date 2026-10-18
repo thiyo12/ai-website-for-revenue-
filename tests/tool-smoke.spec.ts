@@ -140,3 +140,29 @@ test("currency converter calculates both directions from mocked rate data", asyn
   await page.getByRole("button", { name: "Swap currencies" }).click();
   await expect(page.getByText(/\$ 5 USD/)).toBeVisible();
 });
+
+test("random name picker does not reuse the last name until reset", async ({ page }) => {
+  await page.goto("/random-name-picker");
+  await page.locator("textarea").first().fill("OnlyName");
+  await expect(page.getByText("Names remaining in pool: 1")).toBeVisible();
+  await page.getByRole("button", { name: "Spin", exact: true }).click();
+  await expect(page.getByText("Winner!")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText("Names remaining in pool: 0")).toBeVisible();
+  await expect(page.getByRole("button", { name: /All names picked/ })).toBeDisabled();
+  await page.getByRole("button", { name: "Reset" }).click();
+  await expect(page.getByRole("button", { name: "Spin", exact: true })).toBeEnabled();
+  await expect(page.getByText("Names remaining in pool: 1")).toBeVisible();
+});
+
+test("username generator respects base word and no-numbers setting", async ({ page }) => {
+  await page.goto("/username-generator");
+  await page.locator("#us-base").fill("quic");
+  await page.getByLabel("Numbers", { exact: true }).uncheck();
+  await page.getByRole("button", { name: "Generate usernames" }).click();
+  const names = await page.locator("ul li button span:first-child").allTextContents();
+  expect(names).toHaveLength(8);
+  for (const name of names) {
+    expect(name.startsWith("Quic")).toBe(true);
+    expect(/[0-9]/.test(name)).toBe(false);
+  }
+});
