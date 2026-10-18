@@ -29,7 +29,7 @@ jobs:
         run: npm ci
 
       - name: Audit production dependencies (security report)
-        run: node scripts/audit-production.mjs
+        run: node scripts/audit-production.mjs --enforce
 
       - name: Generate Prisma client
         run: npx prisma generate
