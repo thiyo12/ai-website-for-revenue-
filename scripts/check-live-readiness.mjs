@@ -51,8 +51,8 @@ await verify("Homepage and metadata", async () => {
 await verify("Trust and legal pages", async () => {
   for (const route of ["/about", "/contact", "/privacy", "/terms-of-service"]) {
     const html = await get(route);
-    if (!/<title>[^<]+<\\/title>/i.test(html)) throw Error("Missing title on " + route);
-    if (!/<h1[\\s>]/i.test(html)) throw Error("Missing heading on " + route);
+    if (!/<title>[^<]+<\/title>/i.test(html)) throw Error("Missing title on " + route);
+    if (!/<h1[\s>]/i.test(html)) throw Error("Missing heading on " + route);
   }
 });
 await verify("robots.txt sitemap declaration", async () => {
