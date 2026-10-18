@@ -170,6 +170,7 @@ test("social image resizer actually center-crops source and exports correct dime
   await page.getByRole("button", { name: "Resize to 120x120" }).click();
   const image = page.getByRole("img", { name: "Resized" });
   await expect(image).toBeVisible();
+  await expect.poll(() => image.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBe(120);
   const resultPixels = await image.evaluate((el: HTMLImageElement) => {
     const canvas = document.createElement("canvas");
     canvas.width = el.naturalWidth; canvas.height = el.naturalHeight;
