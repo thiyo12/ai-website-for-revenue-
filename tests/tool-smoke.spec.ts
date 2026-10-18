@@ -110,6 +110,9 @@ test("age calculator handles calendar dates independently of browser time zone",
   await page.locator("#age-target").fill("2026-10-15");
   await expect(page.getByText("26 years", { exact: true })).toBeVisible();
   await expect(page.getByText("9 months and 0 days")).toBeVisible();
+  await page.locator("#age-birth").fill("2024-01-31");
+  await page.locator("#age-target").fill("2024-02-29");
+  await expect(page.getByText("1 months and 0 days")).toBeVisible();
   await page.locator("#age-target").fill("1999-12-31");
   await expect(page.getByText("Please select a valid date of birth.")).toBeVisible();
 });
