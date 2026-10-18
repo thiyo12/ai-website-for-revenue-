@@ -126,7 +126,10 @@ export default function SocialMediaVideoDownloader() {
   const videoHref = data?.downloadUrl
     ? proxyHref(data.downloadUrl, data.audioUrl, data.title, data.videoOnly)
     : null;
-  const audioHref = data?.audioUrl ? proxyHref(data.audioUrl, null, data.title, false, true) : null;
+  // A progressive MP4 includes an audio track, so MP3 conversion should also
+  // work even when the extractor did not return a separate audio-only URL.
+  const audioSource = data?.audioUrl ?? (!data?.videoOnly ? data?.downloadUrl : null);
+  const audioHref = audioSource ? proxyHref(audioSource, null, data?.title, false, true) : null;
 
   return (
     <div className="w-full">
