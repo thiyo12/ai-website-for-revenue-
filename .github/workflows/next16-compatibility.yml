@@ -35,7 +35,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
       - name: Build with patched Next.js 16 using webpack
-        run: npm run build -- --webpack
+        run: npm run build
         env:
           NEXT_PUBLIC_SITE_URL: https://quictools.cc
           NEXT_PUBLIC_ENABLE_PRO_PAYWALL: "false"
