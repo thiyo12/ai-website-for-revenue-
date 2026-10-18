@@ -1,0 +1,36 @@
+name: Next 16 Security Upgrade Probe
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  compatibility:
+    name: Next.js 16 compatibility (non-blocking probe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install existing dependencies
+        run: npm ci
+      - name: Stage patched framework upgrade in isolated CI checkout
+        run: |
+          npm install --no-save --legacy-peer-deps next@16.4.2 react@19.2.0 react-dom@19.2.0 @types/react@19 @types/react-dom@19 eslint-config-next@16.4.2 eslint@9
+          node -e "console.log('Next.js:', require('next/package.json').version)"
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
+      - name: Build with patched Next.js 16 using webpack
+        run: npm run build -- --webpack
+        env:
+          NEXT_PUBLIC_SITE_URL: https://quictools.cc
+          NEXT_PUBLIC_ENABLE_PRO_PAYWALL: "false"
+          DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
+      - name: Report remaining production advisories in upgraded dependency graph
+        run: node scripts/audit-production.mjs
