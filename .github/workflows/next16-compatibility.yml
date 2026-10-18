@@ -1,8 +1,7 @@
 name: Next 16 Security Upgrade Probe
 
 on:
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
