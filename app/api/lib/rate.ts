@@ -88,7 +88,7 @@ export function isPrivateIpAddress(ip: string): boolean {
   }
 
   const parts = address.split(".");
-  if (parts.length !== 4 || parts.some((part) => !/^\\d{1,3}$/.test(part))) return true;
+  if (parts.length !== 4 || parts.some((part) => !/^\d{1,3}$/.test(part))) return true;
   const [a, b, third] = parts.map(Number);
   if (parts.some((part) => Number(part) > 255)) return true;
   if (a === 10 || a === 127 || a === 0 || a >= 224) return true;
