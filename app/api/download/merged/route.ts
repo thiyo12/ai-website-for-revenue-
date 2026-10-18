@@ -10,18 +10,22 @@ import { assertAllowedVideoCdnUrl, safeVideoCdnFetch } from "../../lib/video-cdn
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 600;
+export const maxDuration = 240;
 
-const limiter = new RateLimiter(20, 60_000);
+const limiter = new RateLimiter(6, 60_000);
 const MAX_DOWNLOAD_BYTES = 250 * 1024 * 1024;
 const MAX_COMBINED_BYTES = MAX_DOWNLOAD_BYTES;
+const MAX_TRANSCODE_MS = 180_000;
+const MAX_TRANSCODE_SECONDS = 900;
+const MAX_OUTPUT_BYTES = 250 * 1024 * 1024;
 
 
 async function fetchFile(
   target: URL,
   headers: Record<string, string>,
   dest: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  budget: { received: number }
 ): Promise<void> {
   const res = await safeVideoCdnFetch(target, headers, signal);
   if (!res.ok && res.status !== 206) {
@@ -29,7 +33,7 @@ async function fetchFile(
   }
   if (!res.body) throw new Error("empty body");
   const size = Number(res.headers.get("content-length") ?? 0);
-  if (size > MAX_DOWNLOAD_BYTES) throw new Error("too large");
+  if (size > MAX_DOWNLOAD_BYTES || budget.received + size > MAX_COMBINED_BYTES) throw new Error("too large");
   const file = await fs.open(dest, "w");
   let received = 0;
   try {
@@ -38,7 +42,8 @@ async function fetchFile(
       if (signal.aborted) throw new Error("aborted");
       const c = chunk as Uint8Array;
       received += c.byteLength;
-      if (received > MAX_COMBINED_BYTES) throw new Error("too large");
+      budget.received += c.byteLength;
+      if (received > MAX_DOWNLOAD_BYTES || budget.received > MAX_COMBINED_BYTES) throw new Error("too large");
       for (let i = 0; i < c.length; i += buf.length) {
         const part = c.subarray(i, i + buf.length);
         await file.write(part);
@@ -93,7 +98,8 @@ function runFfmpegMerge(video: string, audio: string | null, output: string): Pr
           "-movflags", "+faststart",
           output,
         ];
-    const child = spawn("ffmpeg", args, { stdio: ["ignore", "pipe", "pipe"] });
+    args.splice(0, 0, "-nostdin", "-threads", "2", "-t", String(MAX_TRANSCODE_SECONDS));
+    const child = spawn("ffmpeg", args, { stdio: ["ignore", "pipe", "pipe"], timeout: MAX_TRANSCODE_MS, killSignal: "SIGKILL" });
     let stderr = "";
     child.stderr.on("data", (d: Buffer) => {
       if (stderr.length < 64_000) stderr += d.toString("utf8");
@@ -212,11 +218,13 @@ export async function GET(req: NextRequest): Promise<Response> {
 
   try {
     await assertAllowedVideoCdnUrl(video);
+    const budget = { received: 0 };
     const fetchVideo = fetchFile(
       video,
       { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36", Accept: "*/*" },
       videoFile,
-      AbortSignal.timeout(120_000)
+      AbortSignal.timeout(120_000),
+      budget
     );
     let fetchAudio: Promise<void> | null = null;
     if (audio && audioFile) {
@@ -225,14 +233,17 @@ export async function GET(req: NextRequest): Promise<Response> {
         audio,
         { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36", Accept: "*/*" },
         audioFile,
-        AbortSignal.timeout(120_000)
+        AbortSignal.timeout(120_000),
+        budget
       );
     }
-    await Promise.all([fetchVideo, fetchAudio].filter((p): p is Promise<void> => !!p));
+    const downloads = await Promise.allSettled([fetchVideo, fetchAudio].filter((p): p is Promise<void> => !!p));
+    const failed = downloads.find((d): d is PromiseRejectedResult => d.status === "rejected");
+    if (failed) throw failed.reason;
 
     const { code, stderr } = audioOnly
       ? await new Promise<{ code: number; stderr: string }>((resolve) => {
-          const proc = spawn("ffmpeg", ["-y", "-i", videoFile, "-vn", "-codec:a", "libmp3lame", "-b:a", "192k", output], { stdio: ["ignore", "ignore", "pipe"] });
+          const proc = spawn("ffmpeg", ["-nostdin", "-y", "-threads", "2", "-t", String(MAX_TRANSCODE_SECONDS), "-i", videoFile, "-vn", "-codec:a", "libmp3lame", "-b:a", "192k", output], { stdio: ["ignore", "ignore", "pipe"], timeout: MAX_TRANSCODE_MS, killSignal: "SIGKILL" });
           let stderr = "";
           proc.stderr.on("data", (d: Buffer) => { if (stderr.length < 64000) stderr += d.toString("utf8"); });
           proc.on("error", () => resolve({ code: 1, stderr: "ffmpeg unavailable" }));
@@ -245,6 +256,10 @@ export async function GET(req: NextRequest): Promise<Response> {
     }
 
     const stat = await fs.stat(output);
+    if (stat.size === 0 || stat.size > MAX_OUTPUT_BYTES) {
+      await rm(dir, { recursive: true, force: true });
+      return new Response("Converted media exceeded the supported output size or was empty.", { status: 413 });
+    }
     const pass = new PassThrough();
     const rs = await fs.open(output);
     const stream = rs.createReadStream();
