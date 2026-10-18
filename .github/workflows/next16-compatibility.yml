@@ -23,6 +23,10 @@ jobs:
           npm install --save --legacy-peer-deps next@16.4.2 react@19.2.0 react-dom@19.2.0
           npm install --save-dev --legacy-peer-deps @types/react@19 @types/react-dom@19 eslint-config-next@16.4.2 eslint@9
           node -e "console.log('Next.js:', require('next/package.json').version)"
+      - name: Try nonbreaking security patches in isolated candidate
+        run: |
+          npm audit fix --legacy-peer-deps || true
+          node scripts/audit-production.mjs
       - name: Generate Prisma client
         run: npx prisma generate
         env:
