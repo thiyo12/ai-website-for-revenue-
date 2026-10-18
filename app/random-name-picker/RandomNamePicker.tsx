@@ -7,7 +7,8 @@ import { exportElementAsPng } from "@/lib/exportImage";
 
 export default function RandomNamePicker() {
   const [names, setNames] = useState("Alex\nJamie\nTaylor\nMorgan\nCasey");
-  const [pool, setPool] = useState<string[]>([]);
+  // null means the editor list has not yet been loaded into the draw pool.
+  const [pool, setPool] = useState<string[] | null>(null);
   const [running, setRunning] = useState(false);
   const [spinText, setSpinText] = useState("Spin");
   const [winner, setWinner] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export default function RandomNamePicker() {
 
   const spin = () => {
     if (running) return;
-    const current = pool.length ? pool : parseNames(names);
+    const current = pool ?? parseNames(names);
     if (!current.length) return;
     setWinner(null);
     setRunning(true);
@@ -42,13 +43,15 @@ export default function RandomNamePicker() {
       setSpinText(current[Math.floor(Math.random() * current.length)]);
       if (ticks >= 18) {
         if (intervalRef.current) clearInterval(intervalRef.current);
-        const picked = current[Math.floor(Math.random() * current.length)];
+        const winnerIndex = Math.floor(Math.random() * current.length);
+        const picked = current[winnerIndex];
         setSpinText(picked);
         setWinner(picked);
         setRunning(false);
         setHistory((h) => [picked, ...h]);
         if (removeWinner) {
-          setPool(current.filter((n) => n !== picked));
+          // Remove exactly the selected entry, preserving separately entered duplicates.
+          setPool(current.filter((_, i) => i !== winnerIndex));
         }
       }
     }, 80);
@@ -57,7 +60,7 @@ export default function RandomNamePicker() {
   const reset = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setRunning(false);
-    setPool([]);
+    setPool(null);
     setWinner(null);
     setHistory([]);
     setSpinText("Spin");
@@ -88,7 +91,7 @@ export default function RandomNamePicker() {
             <button type="button" onClick={reset} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Reset</button>
           </div>
         </div>
-        <p className="mt-2 text-xs text-gray-500">Names remaining in pool: {pool.length || 0}</p>
+        <p className="mt-2 text-xs text-gray-500">Names remaining in pool: {pool === null ? parseNames(names).length : pool.length}</p>
       </div>
 
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
@@ -116,10 +119,10 @@ export default function RandomNamePicker() {
       <button
         type="button"
         onClick={spin}
-        disabled={running}
+        disabled={running || (pool !== null && pool.length === 0)}
         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-accent-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {running ? "Spinning…" : "Spin"}
+        {running ? "Spinning…" : pool !== null && pool.length === 0 ? "All names picked — reset to start over" : "Spin"}
       </button>
 
       <AdGate
