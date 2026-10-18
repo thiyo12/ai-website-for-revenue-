@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Header() {
   return (
     <header className="border-b border-gray-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-3">
+      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-4 py-3">
         <Link href="/" className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-600 text-lg font-bold text-white">
             Q
@@ -13,7 +13,7 @@ export default function Header() {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-1 sm:gap-2">
+        <nav className="flex flex-wrap items-center gap-1 sm:gap-2">
           <Link
             href="/about"
             className="rounded-lg px-3 py-2 text-sm font-semibold text-gray-700 transition-colors hover:text-accent-600"
