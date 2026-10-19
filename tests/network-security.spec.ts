@@ -1,5 +1,5 @@
 import { test, expect } from "playwright/test";
-import { isPrivateIpAddress } from "../app/api/lib/rate";
+import { isPrivateIpAddress, RateLimiter } from "../app/api/lib/rate";
 import { isAllowedVideoCdnUrl } from "../app/api/lib/video-cdn";
 
 test("network guard rejects internal and reserved IPv4 / IPv6 addresses", () => {
@@ -31,4 +31,15 @@ test("media proxy accepts only HTTPS googlevideo CDN hosts", () => {
   ]) {
     expect(isAllowedVideoCdnUrl(new URL(url)), url).toBe(false);
   }
+});
+
+test("in-memory throttling caps identities, expires old ones, and limits repeat callers", async () => {
+  const limiter = new RateLimiter(2, 20, 2);
+  expect(limiter.isLimited("client-a")).toBe(false);
+  expect(limiter.isLimited("client-a")).toBe(false);
+  expect(limiter.isLimited("client-a")).toBe(true);
+  expect(limiter.isLimited("client-b")).toBe(false);
+  expect(limiter.isLimited("client-c")).toBe(true);
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  expect(limiter.isLimited("client-c")).toBe(false);
 });
