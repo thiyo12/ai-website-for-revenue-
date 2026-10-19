@@ -276,3 +276,23 @@ test("PDF-to-Word explains when a scanned or image-only page needs OCR", async (
   await page.getByRole("button", { name: "Convert to Word" }).click();
   await expect(page.getByText(/no selectable text.*OCR first/i)).toBeVisible();
 });
+
+
+test("meme generator exports an actual PNG after changing caption", async ({ page }) => {
+  await page.goto("/meme-generator");
+  await page.getByRole("button", { name: /Surprised/ }).click();
+  await page.locator('input:not([type])').first().fill("meme quality check");
+  const result = await captureDownload(page, /Download Meme/);
+  expect(result.filename).toBe("meme.png");
+  expect(result.bytes.subarray(0, 8)).toEqual(Buffer.from([137,80,78,71,13,10,26,10]));
+  expect(result.bytes.length).toBeGreaterThan(1000);
+});
+
+test("text to handwriting exports a PDF with a real page", async ({ page }) => {
+  await page.goto("/text-to-handwriting");
+  await page.locator("textarea").fill("QuicTools text export");
+  const result = await captureDownload(page, /Download PDF/);
+  expect(result.filename).toBe("handwriting.pdf");
+  const pdf = await PDFDocument.load(result.bytes);
+  expect(pdf.getPageCount()).toBeGreaterThan(0);
+});
