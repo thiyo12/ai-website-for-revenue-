@@ -50,7 +50,7 @@ export default function TypingSpeedTest() {
       else Sound.wrong();
     }
     setInput(v);
-    if (status === "idle" && v.length === 1) {
+    if (status === "idle" && v.length > 0) {
       setStatus("typing");
     }
   };
