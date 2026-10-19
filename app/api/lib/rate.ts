@@ -20,20 +20,19 @@ function isWellFormedIp(value: string): boolean {
   return false;
 }
 
-// Trust strategy: a well-formed X-Forwarded-For appended by our proxy is the
-// reliable source. We only accept the first value if it is a well-formed IP;
-// otherwise fall back to a well-formed X-Real-IP, then to a per-instance
-// sentinel. We never trust an arbitrary non-IP string, which closes the
-// header-spoofing rate-limit bypass (an attacker can no longer rotate XFF to
-// get a fresh identity).
+// A reverse proxy must overwrite untrusted forwarding headers or append
+// the actual connecting IP. The leftmost X-Forwarded-For entry is often
+// attacker-controlled; use the rightmost value added by the nearest proxy.
+// This remains a process-local throttle, not a substitute for edge rate limits.
 export function getClientIp(req: NextRequest): string {
-  const fwd = req.headers.get("x-forwarded-for");
-  if (fwd) {
-    const first = fwd.split(",")[0].trim();
-    if (isWellFormedIp(first)) return first;
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const chain = forwarded.split(",").map((x) => x.trim());
+    const nearest = chain[chain.length - 1];
+    if (isWellFormedIp(nearest)) return nearest;
   }
-  const real = req.headers.get("x-real-ip");
-  if (real && isWellFormedIp(real.trim())) return real.trim();
+  const real = req.headers.get("x-real-ip")?.trim();
+  if (real && isWellFormedIp(real)) return real;
   return "untrusted-default";
 }
 
