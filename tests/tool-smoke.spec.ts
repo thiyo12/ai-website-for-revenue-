@@ -245,3 +245,42 @@ test("public navigation links resolve without broken internal pages", async ({ p
     expect(response.status(), "Broken internal navigation link: " + pathname).toBe(200);
   }
 });
+
+
+test("two-player tic tac toe detects a win and resets the board", async ({ page }) => {
+  await page.goto("/tic-tac-toe");
+  await page.getByRole("button", { name: "2 Player" }).click();
+  const cells = page.locator(".grid.grid-cols-3 > button");
+  await expect(cells).toHaveCount(9);
+  for (const i of [0, 3, 1, 4, 2]) await cells.nth(i).click();
+  await expect(page.getByText("X wins the round!")).toBeVisible();
+  await page.getByRole("button", { name: "New round" }).click();
+  await expect(cells.nth(0)).toHaveText("");
+  await expect(page.getByText("Player X's turn")).toBeVisible();
+});
+
+test("typing speed test starts with multi-character input and reports results", async ({ page }) => {
+  await page.goto("/typing-speed-test");
+  await page.locator("textarea").fill("The quick");
+  await expect(page.getByRole("button", { name: "Finish" })).toBeVisible();
+  await page.getByRole("button", { name: "Finish" }).click();
+  await expect(page.getByText("100%", { exact: true })).toBeVisible();
+  await expect(page.getByText("2", { exact: true }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Try again" }).click();
+  await expect(page.locator("textarea")).toHaveValue("");
+});
+
+test("typed signature exports a readable PNG", async ({ page }) => {
+  await page.goto("/signature-generator");
+  await page.getByRole("button", { name: "Type", exact: true }).click();
+  await page.locator('input[type="text"]').fill("Quality Check");
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download PNG" }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("signature.png");
+  const filename = await download.path();
+  expect(filename).not.toBeNull();
+  const bytes = await (await import("node:fs/promises")).readFile(filename!);
+  expect(bytes.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
+  expect(bytes.length).toBeGreaterThan(200);
+});
