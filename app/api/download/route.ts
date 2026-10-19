@@ -46,15 +46,6 @@ export async function GET(req: NextRequest): Promise<Response> {
 
 
 
-  try {
-    await assertAllowedVideoCdnUrl(target);
-  } catch {
-    return new Response(
-      "This link points to a private or restricted address and cannot be fetched.",
-      { status: 403 }
-    );
-  }
-
   // Byte ranges are needed for seeking but must not bypass the proxy limit.
   const range = req.headers.get("range");
   let safeRange: string | null = null;
@@ -68,6 +59,16 @@ export async function GET(req: NextRequest): Promise<Response> {
     }
     safeRange = `bytes=${start}-${end}`;
   }
+
+  try {
+    await assertAllowedVideoCdnUrl(target);
+  } catch {
+    return new Response(
+      "This link points to a private or restricted address and cannot be fetched.",
+      { status: 403 }
+    );
+  }
+
   const upstreamHeaders: Record<string, string> = {
     "User-Agent":
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
