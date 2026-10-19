@@ -1,0 +1,39 @@
+name: Verify QuicTools Live Deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out release source
+        uses: actions/checkout@v4
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify live release and public SEO endpoints
+        env:
+          SITE_URL: https://quictools.cc
+          FULL_SITEMAP: "0"
+        shell: bash
+        run: |
+          for attempt in 1 2 3 4; do
+            echo "Production verification attempt $attempt of 4"
+            if npm run qa:live; then
+              echo "Live revision and public checks passed"
+              exit 0
+            fi
+            if [ "$attempt" != 4 ]; then
+              sleep 60
+            fi
+          done
+          echo "Live deployment is not verified. Inspect Dokploy build and domain settings."
+          exit 1

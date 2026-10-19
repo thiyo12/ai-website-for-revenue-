@@ -42,6 +42,14 @@ async function verify(name, fn) {
   }
 }
 
+await verify("Expected release revision", async () => {
+  const expected = JSON.parse(readFileSync(new URL("../public/release.json", import.meta.url), "utf8"));
+  const actual = JSON.parse(await get("/release.json"));
+  if (actual.release_commit !== expected.release_commit) {
+    throw Error("Release revision does not match: expected " + expected.release_commit + ", got " + actual.release_commit);
+  }
+  return "Release " + actual.release_commit.slice(0, 12);
+});
 await verify("Homepage and metadata", async () => {
   const html = await get("/");
   if (!/<title>[^<]+<\/title>/i.test(html)) throw Error("Missing page title");
