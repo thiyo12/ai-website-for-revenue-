@@ -150,8 +150,8 @@ export default function SignatureGenerator() {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Your name</label>
-                <input value={typedText} onChange={(e) => setTypedText(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm" />
+                <label htmlFor="signature-name" className="mb-1 block text-sm font-medium text-gray-700">Your name</label>
+                <input id="signature-name" type="text" value={typedText} onChange={(e) => setTypedText(e.target.value)} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm" />
               </div>
             </>
           )}
