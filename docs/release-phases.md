@@ -6,27 +6,28 @@
 
 ## Phase 0 — Baseline and release controls (completed on branch)
 - [x] `npm run build` and sitemap generation pass under Node 22
-- [x] Playwright baseline: 71 tests passed on workflow run #56
+- [x] Playwright baseline: 140 tests passed on workflow run #108; expanded tests added since (latest run pending)
 - [x] Keep changes on a pull request and document release blockers
 **Gate:** Never deploy a failing branch; record a successful build/test run for each candidate SHA.
 
-## Phase 1 — Security and stability (IN PROGRESS; blocks release)
-- [x] Run `npm audit --omit=dev` in CI. Current branch: 1 critical, 7 high, 1 low production findings (run #59).
-- [x] Smoke-build patched Next.js 16.4.2 + React 19.2 candidate and pass all 75 browser tests in an isolated CI checkout (run #10).
-- [ ] Promote the tested package manifest + generated lockfile from the compatibility probe into a dedicated reviewed migration commit; rerun all tests after promotion.
-- [ ] Triage remaining patched-framework advisories; the initial upgrade candidate reported 1 high (`source-map-js`) and 1 low (`dompurify`).
-- [ ] Fix production critical/high findings, update the lockfile safely, and enforce an audit gate; don't run `npm audit fix --force` blindly.
-- [x] Restrict video-download proxy destinations and redirects to YouTube media CDN, with size limits and negative security tests.
-- [ ] Validate yt-dlp, ffmpeg, file-size ceilings, rate limits, resource exhaustion, DNS rebinding, and proxy header trust in the production environment.
-- [ ] Add input/size/timeout tests for each server endpoint.
-**Gate:** No untriaged critical/high production advisories; no open arbitrary-address proxy; supported deployment runtimes.
+## Phase 1 — Security and stability (CODE AUDIT GREEN; production validation pending)
+- [x] Upgrade and lock Next.js 16.4.2 / React 19.2; enforce a high/critical dependency audit gate in CI.
+- [x] `npm audit --omit=dev`: **0 production advisories** in successful branch run #108 (Oct 18, 2026).
+- [x] Restrict media proxy hosts/redirects and validate common reserved IPv4/IPv6 ranges.
+- [x] Add bounded media range requests, shared media input limits, FFmpeg timeout/thread limits, and output size guard.
+- [x] Cap in-memory rate limiter client cardinality; test throttling and expiry.
+- [x] Prefer the nearest forwarded IP over a spoofable leftmost chain entry; **still requires trusted edge proxy configuration**.
+- [ ] Verify real deployment DNS / yt-dlp / FFmpeg, reverse-proxy trust, process isolation and distributed rate limiting under load.
+**Gate:** Green latest commit CI and no untriaged critical/high production advisories; review runtime security at the host.
 
 ## Phase 2 — Every tool's real output (IN PROGRESS; blocks release)
-- [x] Browser smoke checks of top-level tool/game routes and no uncaught client errors in that suite.
+- [x] Browser smoke checks of top-level tool/game routes and no uncaught client errors in that suite; mobile viewport coverage at 390px and narrow 320px Sudoku test.
 - [x] Fixture output tests for PDF merge, JPG→PDF, PDF→DOCX, PDF→JPG, DOCX→PDF and image compression.
+- [x] Parse DOCX ZIP central directory instead of trusting missing local-file sizes, cap compressed/uncompressed document sizes, and handle PDF.js text line boundaries and image-only PDF OCR guidance.
 - [x] Unit converter, QR, word count, password, 2048, countdown and palette interaction regression tests.
 - [ ] For *each* remaining tool, test normal input, invalid/empty input, download contents, large input boundaries and mobile interaction.
-- [ ] Test third-party APIs under realistic failures and verify user-facing limitations (notably text-to-speech export and video extraction).
+- [x] Remove nonfunctional external MP3 export promise from text-to-speech; local voice playback remains available.
+- [ ] Test third-party APIs under realistic failures, especially real server video extraction and conversion.
 - [ ] Fix formatting and Unicode limitations in Word/PDF tools rather than promising pixel-perfect conversion.
 **Gate:** 100% of advertised operations have a passing test or are explicitly marked limited/unavailable.
 
@@ -40,6 +41,7 @@
 
 ## Phase 4 — SEO, performance and accessibility
 - [x] Remove obsolete sitemap URLs and validate new generated sitemap.
+- [x] Add automated internal-link integrity checks on public navigation pages.
 - [ ] Check deployed indexable pages: 200 response, unique title/H1, canonical, appropriate robots, original useful instructions, no thin duplicates, valid internal links.
 - [ ] Run Lighthouse on mobile and desktop and measure Core Web Vitals (LCP, INP, CLS).
 - [ ] Check Google Search Console indexing and sitemap results after deployment.
