@@ -223,3 +223,25 @@ test("Sudoku number pad stays usable at 320px viewport width", async ({ page }) 
     .map(el => ({ tag: el.tagName, classes: String(el.className).slice(0, 120), right: Math.round(el.getBoundingClientRect().right), width: Math.round(el.getBoundingClientRect().width) })));
   expect(overflow, JSON.stringify(overflowing)).toBeLessThanOrEqual(2);
 });
+
+
+test("public navigation links resolve without broken internal pages", async ({ page, request }) => {
+  const seen = new Set<string>();
+  for (const entry of ["/", "/games", "/about", "/privacy"]) {
+    await page.goto(entry);
+    const urls = await page.locator('a[href]').evaluateAll((nodes) =>
+      nodes.map((node) => (node as HTMLAnchorElement).href)
+    );
+    for (const raw of urls) {
+      const url = new URL(raw);
+      if (url.origin !== new URL(page.url()).origin) continue;
+      if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/_next/")) continue;
+      seen.add(url.pathname);
+    }
+  }
+  expect(seen.size).toBeGreaterThan(20);
+  for (const pathname of seen) {
+    const response = await request.get(pathname, { maxRedirects: 10 });
+    expect(response.status(), "Broken internal navigation link: " + pathname).toBe(200);
+  }
+});
