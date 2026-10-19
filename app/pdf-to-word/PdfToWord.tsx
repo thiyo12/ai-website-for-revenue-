@@ -6,6 +6,8 @@ import { Document, Packer, Paragraph, TextRun } from "docx";
 import AdGate from "@/components/AdGate";
 import PaywallModal from "@/components/PaywallModal";
 
+const MAX_PDF_BYTES = 30 * 1024 * 1024;
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 export default function PdfToWord() {
@@ -26,12 +28,19 @@ export default function PdfToWord() {
       setError("Please choose a PDF file.");
       return;
     }
+    if (f.size > MAX_PDF_BYTES) {
+      setFile(null);
+      setPageCount(0);
+      setError("Please choose a PDF smaller than 30 MB.");
+      return;
+    }
     setFile(f);
     try {
       const doc = await pdfjsLib.getDocument({ data: new Uint8Array(await f.arrayBuffer()) }).promise;
       setPageCount(doc.numPages);
       doc.destroy();
     } catch {
+      setFile(null);
       setPageCount(0);
       setError("Could not read this PDF. Please try another file.");
     }
@@ -45,22 +54,26 @@ export default function PdfToWord() {
     try {
       const doc = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
       const paragraphs: Paragraph[] = [];
+      let readableText = 0;
 
       for (let i = 1; i <= doc.numPages; i++) {
         const page = await doc.getPage(i);
         const textContent = await page.getTextContent();
         const rawLines: string[] = [];
         let current = "";
-        for (const item of textContent.items as { str?: string }[]) {
-          if (!item.str) continue;
+        for (const item of textContent.items as { str?: string; hasEOL?: boolean }[]) {
+          if (typeof item.str !== "string") continue;
           current += item.str;
-          // Heuristic: items that end a line (newline) break into separate paragraphs
-          if (item.str.endsWith("\n")) {
-            rawLines.push(current.trim());
+          // PDF.js exposes line breaks as hasEOL, not usually as literal
+          // newline characters in the text span.
+          if (item.hasEOL || item.str.endsWith("\n")) {
+            const line = current.trim();
+            if (line) rawLines.push(line);
             current = "";
           }
         }
         if (current.trim()) rawLines.push(current.trim());
+        readableText += rawLines.join("").length;
         page.cleanup();
 
         paragraphs.push(
@@ -76,6 +89,10 @@ export default function PdfToWord() {
       }
 
       doc.destroy();
+      if (readableText === 0) {
+        setError("This PDF contains no selectable text. Use OCR first for scanned pages.");
+        return;
+      }
 
       const wordDoc = new Document({
         sections: [
