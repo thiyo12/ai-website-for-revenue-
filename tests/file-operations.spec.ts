@@ -261,3 +261,18 @@ test("Word-to-PDF accepts DOCX archives with descriptor-style local ZIP headers"
   expect(result.filename).toBe("descriptor.pdf");
   expect((await PDFDocument.load(result.bytes)).getPageCount()).toBe(1);
 });
+
+
+test("PDF-to-Word explains when a scanned or image-only page needs OCR", async ({ page }) => {
+  const doc = await PDFDocument.create();
+  const pdfPage = doc.addPage([240, 160]);
+  pdfPage.drawRectangle({ x: 15, y: 15, width: 100, height: 100 });
+  await page.goto("/pdf-to-word");
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "scanned.pdf", mimeType: "application/pdf",
+    buffer: Buffer.from(await doc.save())
+  });
+  await expect(page.getByText("1 page", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Convert to Word" }).click();
+  await expect(page.getByText(/no selectable text.*OCR first/i)).toBeVisible();
+});
