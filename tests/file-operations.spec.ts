@@ -220,3 +220,44 @@ test("passthrough media endpoint rejects unbounded and malformed byte ranges", a
     expect(response.status(), range).toBe(416);
   }
 });
+
+
+test("Word-to-PDF accepts DOCX archives with descriptor-style local ZIP headers", async ({ page }) => {
+  const doc = new Document({ sections: [{ children: [new Paragraph("Descriptor ZIP fixture")] }] });
+  const original = Buffer.from(await Packer.toBuffer(doc));
+  const eocd = original.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+  expect(eocd).toBeGreaterThan(0);
+  let pos = original.readUInt32LE(eocd + 16);
+  const count = original.readUInt16LE(eocd + 10);
+  let found = false;
+  for (let i = 0; i < count; i++) {
+    expect(original.readUInt32LE(pos)).toBe(0x02014b50);
+    const nameLength = original.readUInt16LE(pos + 28);
+    const extraLength = original.readUInt16LE(pos + 30);
+    const commentLength = original.readUInt16LE(pos + 32);
+    const name = original.subarray(pos + 46, pos + 46 + nameLength).toString("utf8");
+    if (name === "word/document.xml") {
+      const localOffset = original.readUInt32LE(pos + 42);
+      expect(original.readUInt32LE(localOffset)).toBe(0x04034b50);
+      // A valid ZIP reader must use the central-directory size, not the local
+      // header sizes, when bit 3 indicates a data-descriptor layout.
+      original.writeUInt16LE(original.readUInt16LE(localOffset + 6) | 8, localOffset + 6);
+      original.writeUInt32LE(0, localOffset + 18);
+      original.writeUInt32LE(0, localOffset + 22);
+      original.writeUInt16LE(original.readUInt16LE(pos + 8) | 8, pos + 8);
+      found = true;
+      break;
+    }
+    pos += 46 + nameLength + extraLength + commentLength;
+  }
+  expect(found).toBe(true);
+  await page.goto("/word-to-pdf");
+  await page.locator('input[type="file"]').setInputFiles({
+    name: "descriptor.docx",
+    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    buffer: original
+  });
+  const result = await captureDownload(page, /Convert to PDF/);
+  expect(result.filename).toBe("descriptor.pdf");
+  expect((await PDFDocument.load(result.bytes)).getPageCount()).toBe(1);
+});
