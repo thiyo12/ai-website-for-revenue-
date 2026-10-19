@@ -43,19 +43,37 @@ function ipAddressesEqual(a: string, b: string): boolean {
 
 export class RateLimiter {
   private hits = new Map<string, number[]>();
+  private requests = 0;
 
   constructor(
     private readonly max: number,
-    private readonly windowMs: number
+    private readonly windowMs: number,
+    private readonly maxTrackedClients = 10_000
   ) {}
+
+  private prune(now: number): void {
+    for (const [ip, hits] of this.hits) {
+      const live = hits.filter((at) => now - at < this.windowMs);
+      if (live.length) this.hits.set(ip, live);
+      else this.hits.delete(ip);
+    }
+  }
 
   isLimited(ip: string): boolean {
     const now = Date.now();
-    const recent = (this.hits.get(ip) ?? []).filter(
-      (t) => now - t < this.windowMs
-    );
+    // Rate limits are in-memory per process, not a distributed throttle.
+    // Prune expired keys and bound cardinality so unique spoofed identities
+    // cannot indefinitely consume memory on a long-running process.
+    this.requests++;
+    if (this.requests % 256 === 0 || this.hits.size >= this.maxTrackedClients) {
+      this.prune(now);
+    }
+    if (!this.hits.has(ip) && this.hits.size >= this.maxTrackedClients) {
+      return true;
+    }
+    const recent = (this.hits.get(ip) ?? []).filter((at) => now - at < this.windowMs);
     if (recent.length >= this.max) {
-      this.hits.set(ip, recent.filter((t) => now - t < this.windowMs));
+      this.hits.set(ip, recent);
       return true;
     }
     recent.push(now);
