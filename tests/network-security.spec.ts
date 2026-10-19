@@ -1,5 +1,5 @@
 import { test, expect } from "playwright/test";
-import { isPrivateIpAddress, RateLimiter } from "../app/api/lib/rate";
+import { getClientIp, isPrivateIpAddress, RateLimiter } from "../app/api/lib/rate";
 import { isAllowedVideoCdnUrl } from "../app/api/lib/video-cdn";
 
 test("network guard rejects internal and reserved IPv4 / IPv6 addresses", () => {
@@ -42,4 +42,15 @@ test("in-memory throttling caps identities, expires old ones, and limits repeat 
   expect(limiter.isLimited("client-c")).toBe(true);
   await new Promise((resolve) => setTimeout(resolve, 30));
   expect(limiter.isLimited("client-c")).toBe(false);
+});
+
+test("nearest proxy hop is selected rather than spoofable leftmost forwarded IP", () => {
+  const request = { headers: new Headers({
+    "x-forwarded-for": "192.0.2.111, 198.51.100.25, 203.0.113.8",
+    "x-real-ip": "203.0.113.8"
+  }) } as Parameters<typeof getClientIp>[0];
+  expect(getClientIp(request)).toBe("203.0.113.8");
+
+  const bad = { headers: new Headers({ "x-forwarded-for": "anything-invalid" }) } as Parameters<typeof getClientIp>[0];
+  expect(getClientIp(bad)).toBe("untrusted-default");
 });
