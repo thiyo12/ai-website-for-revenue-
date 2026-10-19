@@ -46,16 +46,14 @@ function generate(length: number, counts: Record<string, boolean>): string {
     used++;
   }
 
-  return password
-    .split("")
-    .sort(() => {
-      const ri = new Uint32Array(1);
-      if (typeof window !== "undefined" && window.crypto?.getRandomValues)
-        window.crypto.getRandomValues(ri);
-      else ri[0] = Math.floor(Math.random() * 0xffffffff);
-      return ri[0] - 0x7fffffff;
-    })
-    .join("");
+  // Fisher–Yates shuffle instead of a biased random sort comparator.
+  const chars = password.split("");
+  const random = getRandomBytes(chars.length);
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = random[i] % (i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  return chars.join("");
 }
 
 export default function PasswordGenerator() {

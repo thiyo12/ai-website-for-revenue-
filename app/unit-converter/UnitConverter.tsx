@@ -105,12 +105,16 @@ export default function UnitConverter() {
   };
 
   const handleUnitChange = (side: "from" | "to", value: string) => {
+    // Preserve the quantity the user last entered. Changing a unit should
+    // recalculate the opposite field, not reinterpret that value in the old unit.
     if (side === "from") {
       setFromUnit(value);
-      setToValue(convert(fromValue, value, toUnit));
+      if (lastEdited === "from") setToValue(convert(fromValue, value, toUnit));
+      else setFromValue(convert(toValue, toUnit, value));
     } else {
       setToUnit(value);
-      setFromValue(convert(toValue, fromUnit, value));
+      if (lastEdited === "from") setToValue(convert(fromValue, fromUnit, value));
+      else setFromValue(convert(toValue, value, fromUnit));
     }
   };
 

@@ -1,0 +1,62 @@
+name: Next 16 Security Upgrade Probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compatibility:
+    name: Next.js 16 compatibility (non-blocking probe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install existing dependencies
+        run: npm ci
+      - name: Stage patched framework upgrade in isolated CI checkout
+        run: |
+          npm install --save --legacy-peer-deps next@16.4.2 react@19.2.0 react-dom@19.2.0
+          npm install --save-dev --legacy-peer-deps @types/react@19 @types/react-dom@19 eslint-config-next@16.4.2 eslint@9
+          node -e "console.log('Next.js:', require('next/package.json').version)"
+      - name: Try nonbreaking security patches in isolated candidate
+        run: |
+          npm audit fix --legacy-peer-deps || true
+          node scripts/audit-production.mjs
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
+      - name: Build with patched Next.js 16 using webpack
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: https://quictools.cc
+          NEXT_PUBLIC_ENABLE_PRO_PAYWALL: "false"
+          DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
+      - name: Install Chromium for upgraded framework tests
+        run: npx playwright install --with-deps chromium
+      - name: Run complete Playwright suite against Next.js 16 candidate
+        run: npx playwright test
+        env:
+          CI: "true"
+          NEXT_PUBLIC_SITE_URL: https://quictools.cc
+          NEXT_PUBLIC_ENABLE_PRO_PAYWALL: "false"
+          DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
+      - name: Report remaining production advisories in upgraded dependency graph
+        run: node scripts/audit-production.mjs
+      - name: Upload the resolved upgrade dependency files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: next16-upgrade-candidate
+          path: |
+            package.json
+            package-lock.json
+            tsconfig.json
+          retention-days: 7

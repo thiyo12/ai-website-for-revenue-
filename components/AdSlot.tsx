@@ -32,6 +32,8 @@ export default function AdSlot({
   const insRef = useRef<HTMLModElement>(null);
   const slotId = slot ? SLOT_MAP[slot] ?? "" : "";
   const enabled = Boolean(PUBLIC_ENV.ADSENSE_ID && slotId);
+  // Google publisher guidelines permit only advertising labels, not positional labels.
+  const adLabel = label === "Sponsored Links" ? "Sponsored Links" : "Advertisements";
 
   useEffect(() => {
     if (!enabled || !insRef.current) return;
@@ -47,7 +49,7 @@ export default function AdSlot({
   return (
     <div className={`w-full ${className}`}>
       <p className="mb-1 text-center text-[10px] uppercase tracking-wider text-gray-400">
-        {label}
+        {adLabel}
       </p>
       <ins
         ref={insRef}

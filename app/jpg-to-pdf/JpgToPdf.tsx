@@ -28,9 +28,11 @@ export default function JpgToPdf() {
 
   const addImages = useCallback((fileList: FileList | null) => {
     if (!fileList?.length) return;
-    const imagesOnly = Array.from(fileList).filter((f) => f.type.startsWith("image/"));
+    const imagesOnly = Array.from(fileList).filter((f) =>
+      f.type === "image/jpeg" || f.type === "image/png" || /\.(jpe?g|png)$/i.test(f.name)
+    );
     if (imagesOnly.length === 0) {
-      setError("Please choose image files only.");
+      setError("Please choose JPG or PNG image files only.");
       return;
     }
     setError("");
@@ -152,7 +154,7 @@ export default function JpgToPdf() {
         <input
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,.jpg,.jpeg,.png"
           multiple
           onChange={handleInput}
           className="hidden"

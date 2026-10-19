@@ -432,8 +432,8 @@ export default function DailySudoku() {
   const selectedVal = sr >= 0 ? grid[sr]?.[sc]?.value ?? 0 : 0;
 
   return (
-    <div className="flex flex-col items-center gap-5 p-4 max-w-lg mx-auto select-none">
-      <h1 className="text-2xl font-bold text-gray-900">Daily Sudoku</h1>
+    <div className="flex min-w-0 max-w-full flex-col items-center gap-5 p-0 sm:p-4 mx-auto select-none">
+      <h2 className="text-2xl font-bold text-gray-900">Daily Sudoku</h2>
 
       <div className="flex gap-2">
         {(["easy", "medium", "hard"] as Difficulty[]).map((d) => (
@@ -488,7 +488,7 @@ export default function DailySudoku() {
                   setSelected([r, c]);
                   if (!timerRunning && !solved) setTimerRunning(true);
                 }}
-                className={`w-10 h-10 flex items-center justify-center text-lg ${bg}
+                className={`w-7 h-7 sm:w-10 sm:h-10 flex items-center justify-center text-base sm:text-lg ${bg}
                   ${
                     c < 8
                       ? c % 3 === 2
@@ -556,12 +556,12 @@ export default function DailySudoku() {
         </button>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-0.5 sm:gap-2">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
           <button
             key={n}
             onClick={() => numInput(n)}
-            className="w-10 h-10 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-semibold text-lg transition-colors"
+            className="w-[27px] h-9 sm:w-10 sm:h-10 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-semibold text-sm sm:text-lg transition-colors"
           >
             {n}
           </button>

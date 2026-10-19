@@ -30,6 +30,7 @@ export default function FakeTweetPage() {
       description={description}
       seoTitle={seoTitle}
       seoText={seoText}
+      adsEnabled={false}
     >
       <FakeTweet />
     </ToolLayout>

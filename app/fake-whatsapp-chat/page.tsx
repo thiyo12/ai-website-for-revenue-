@@ -30,6 +30,7 @@ export default function FakeWhatsappChatPage() {
       description={description}
       seoTitle={seoTitle}
       seoText={seoText}
+      adsEnabled={false}
     >
       <FakeWhatsappChat />
     </ToolLayout>

@@ -9,47 +9,103 @@ const MARGIN = 60;
 const FONT_SIZE = 12;
 const LINE_HEIGHT = 18;
 
+const MAX_DOCX_BYTES = 25 * 1024 * 1024;
+const MAX_DOCUMENT_XML_BYTES = 12 * 1024 * 1024;
+
 async function readDocxText(file: File): Promise<string> {
-  const u8 = new Uint8Array(await file.arrayBuffer());
+  if (file.size > MAX_DOCX_BYTES) throw new Error("too-large");
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const u16 = (at: number) => view.getUint16(at, true);
+  const u32 = (at: number) => view.getUint32(at, true);
 
-  // --- Scan the ZIP central directory without a dependency ---
-  // Try local file headers first (many docx are small single-stream).
-  const entries: { name: string; compressed: Uint8Array; method: number }[] = [];
-
-  let off = 0;
-  while (off < u8.length - 4) {
-    if (u8[off] === 0x50 && u8[off + 1] === 0x4b && u8[off + 2] === 0x03 && u8[off + 3] === 0x04) {
-      const compMethod = ((u8[off + 8] | (u8[off + 9] << 8)) & 0xffff);
-      const compSize = ((u8[off + 18] | (u8[off + 19] << 8) | (u8[off + 20] << 16) | (u8[off + 21] << 24)) >>> 0);
-      const nameLen = ((u8[off + 26] | (u8[off + 27] << 8)) & 0xffff);
-      const extraLen = ((u8[off + 28] | (u8[off + 29] << 8)) & 0xffff);
-      const name = new TextDecoder().decode(u8.slice(off + 30, off + 30 + nameLen));
-      const dataStart = off + 30 + nameLen + extraLen;
-      const data = u8.slice(dataStart, dataStart + compSize);
-      entries.push({ name, compressed: data, method: compMethod });
-      off = dataStart + compSize;
-      if (off > u8.length) break;
-    } else {
-      off++;
+  // Use the ZIP *central directory*. Reading only local file headers fails
+  // for valid Word files that store their sizes in trailing data descriptors.
+  const firstEOCD = Math.max(0, bytes.length - 65_557);
+  let eocd = -1;
+  for (let i = bytes.length - 22; i >= firstEOCD; i--) {
+    if (u32(i) === 0x06054b50) {
+      eocd = i;
+      break;
     }
   }
+  if (eocd < 0) throw new Error("not-a-docx");
+  const count = u16(eocd + 10);
+  const directorySize = u32(eocd + 12);
+  const directoryStart = u32(eocd + 16);
+  if (count === 0xffff || directoryStart === 0xffffffff ||
+      directorySize === 0xffffffff ||
+      directoryStart + directorySize > eocd) throw new Error("not-a-docx");
 
-  const target = entries.find((e) => e.name === "word/document.xml");
-  if (!target) throw new Error("not-a-docx");
+  let pos = directoryStart;
+  let compressed: Uint8Array | null = null;
+  let method = 0;
+  let expectedBytes = 0;
+  for (let entry = 0; entry < count; entry++) {
+    if (pos + 46 > bytes.length || u32(pos) !== 0x02014b50) throw new Error("not-a-docx");
+    const flags = u16(pos + 8);
+    const itemMethod = u16(pos + 10);
+    const compSize = u32(pos + 20);
+    const rawSize = u32(pos + 24);
+    const nameLength = u16(pos + 28);
+    const extraLength = u16(pos + 30);
+    const commentLength = u16(pos + 32);
+    const localOffset = u32(pos + 42);
+    const next = pos + 46 + nameLength + extraLength + commentLength;
+    if (next > bytes.length || next > directoryStart + directorySize) throw new Error("not-a-docx");
+    const name = new TextDecoder().decode(bytes.subarray(pos + 46, pos + 46 + nameLength));
+    pos = next;
+    if (name !== "word/document.xml") continue;
+    if ((flags & 1) || compSize > MAX_DOCX_BYTES || rawSize > MAX_DOCUMENT_XML_BYTES ||
+        localOffset + 30 > bytes.length || u32(localOffset) !== 0x04034b50) {
+      throw new Error("not-a-docx");
+    }
+    const localNameLength = u16(localOffset + 26);
+    const localExtraLength = u16(localOffset + 28);
+    const dataStart = localOffset + 30 + localNameLength + localExtraLength;
+    if (dataStart + compSize > bytes.length) throw new Error("not-a-docx");
+    compressed = bytes.subarray(dataStart, dataStart + compSize);
+    method = itemMethod;
+    expectedBytes = rawSize;
+    break;
+  }
+  if (!compressed) throw new Error("not-a-docx");
 
-  let raw: Uint8Array;
-  if (target.method === 0) {
-    raw = target.compressed;
-  } else if (target.method === 8 && typeof DecompressionStream !== "undefined") {
-    const ds = new DecompressionStream("deflate-raw");
-    const stream = new Blob([target.compressed.slice()]).stream().pipeThrough(ds);
-    raw = new Uint8Array(await new Response(stream).arrayBuffer());
+  let stream: ReadableStream<Uint8Array>;
+  if (method === 0) {
+    stream = new Blob([compressed.slice()]).stream();
+  } else if (method === 8 && typeof DecompressionStream !== "undefined") {
+    stream = new Blob([compressed.slice()]).stream()
+      .pipeThrough(new DecompressionStream("deflate-raw"));
   } else {
     throw new Error("no-inflate");
   }
 
-  const xml = new TextDecoder().decode(raw);
-  return xml;
+  const chunks: Uint8Array[] = [];
+  const reader = stream.getReader();
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_DOCUMENT_XML_BYTES) {
+        await reader.cancel();
+        throw new Error("too-large");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  if (total !== expectedBytes) throw new Error("not-a-docx");
+  const xml = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    xml.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(xml);
 }
 
 function stripXml(xml: string): string {
@@ -82,6 +138,11 @@ export default function WordToPdf() {
     setSuccess("");
     if (!f.name.toLowerCase().endsWith(".docx")) {
       setError("Please choose a Word (.docx) file.");
+      return;
+    }
+    if (f.size > MAX_DOCX_BYTES) {
+      setFile(null);
+      setError("Please choose a Word file smaller than 25 MB.");
       return;
     }
     setFile(f);
@@ -153,8 +214,10 @@ export default function WordToPdf() {
       console.error(err);
       setError(
         err instanceof Error && err.message === "no-inflate"
-          ? "This .docx file is compressed, and your browser doesn't support the decompression API needed to read it. Try updating your browser or using a recent version of Chrome, Firefox, Edge, or Safari."
-          : "Could not convert this file. Please make sure it is a valid Word (.docx) document."
+          ? "Your browser cannot decompress this Word document. Try a recent version of Chrome, Firefox, Edge or Safari."
+          : err instanceof Error && err.message === "too-large"
+            ? "This document is too large to convert safely. Use a file smaller than 25 MB."
+            : "Could not convert the text in this Word document. Complex formatting or unsupported characters may require a desktop converter."
       );
     } finally {
       setConverting(false);

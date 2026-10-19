@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,14 +19,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node.js 20
+      - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Enforce production dependency security audit
+        run: node scripts/audit-production.mjs --enforce
 
       - name: Generate Prisma client
         run: npx prisma generate
@@ -33,6 +39,20 @@ jobs:
       - name: Build production app
         run: npm run build
         env:
+          NEXT_PUBLIC_SITE_URL: https://quictools.cc
+          NEXT_PUBLIC_ENABLE_PRO_PAYWALL: "false"
+          DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
+
+      - name: Verify SEO sitemap
+        run: node scripts/check-sitemap.mjs
+
+      - name: Install browser for smoke tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Run every tool route and interaction smoke tests
+        run: npx playwright test
+        env:
+          CI: "true"
           NEXT_PUBLIC_SITE_URL: https://quictools.cc
           NEXT_PUBLIC_ENABLE_PRO_PAYWALL: "false"
           DATABASE_URL: postgresql://user:pass@localhost:5432/quictools
