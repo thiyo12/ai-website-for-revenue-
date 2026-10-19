@@ -212,3 +212,11 @@ test("resume builder exports the edited preview as a valid PDF", async ({ page }
   const pdf = await PDFDocument.load(result.bytes);
   expect(pdf.getPageCount()).toBeGreaterThan(0);
 });
+
+test("passthrough media endpoint rejects unbounded and malformed byte ranges", async ({ request }) => {
+  const url = "/api/download?url=" + encodeURIComponent("https://rr1---sn.googlevideo.com/videoplayback");
+  for (const range of ["bytes=0-20000000", "bytes=0-1,3-4", "bytes=200-100", "bytes=-100", "bytes=999999999999999999-"]) {
+    const response = await request.get(url, { headers: { Range: range } });
+    expect(response.status(), range).toBe(416);
+  }
+});
