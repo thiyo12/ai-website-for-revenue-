@@ -1,4 +1,4 @@
 {
-  "release_commit": "94f3cfa307d804a88e522a62942b48f3fbec2e40",
-  "description": "QuicTools release tested in pull request #2"
+  "release_commit": "8ab8e91c232188c29842309ee04e1978534536ba",
+  "description": "QuicTools release with verified Dokploy npm lockfile and ONNX runtime repair"
 }
