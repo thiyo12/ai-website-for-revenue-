@@ -6,7 +6,7 @@ on:
       - fix/dokploy-onnx-peer-lockfile-20261020
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   repair:
@@ -38,3 +38,13 @@ jobs:
             package.json
             package-lock.json
           retention-days: 7
+      - name: Verify actual Docker installer stage
+        run: docker build --target installer --progress=plain -t quictools-dokploy-deps-test .
+      - name: Commit verified dependency repair on feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git diff --cached --check
+          git commit -m "Fix missing ONNX peer dependency in production lockfile"
+          git push origin HEAD:fix/dokploy-onnx-peer-lockfile-20261020
